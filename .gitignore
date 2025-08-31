@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual env
+venv/
+env/
+ENV/
+*.env
+*.venv
+
+# Django stuff
+*.log
+*.pot
+*.pyc
+db.sqlite3
+media/
+staticfiles/
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Byte-compiled / C extensions
+*.so
+
+# Tests
+.coverage
+htmlcov/
+.tox/
+.pytest_cache/
+
+# Migrations (optional – keep if you want to track)
+# Uncomment if you don't want migration files in repo
+ */migrations/*.py
+ !*/migrations/__init__.py
+
+# Node (if frontend bundled)
+node_modules/
+
+# Mac / Windows trash
+.DS_Store
+Thumbs.db
