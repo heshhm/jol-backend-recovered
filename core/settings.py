@@ -25,7 +25,7 @@ LOGOUT_REDIRECT_URL = "dashboard:index"
 GOOGLE_CALLBACK_ADDRESS = f"{BASE_URL}/accounts/google/login/callback/"
 APPLE_CALLBACK_ADDRESS = f"{BASE_URL}/accounts/apple/login/callback/"
 
-ROOT_URLCONF = "root.urls"
+ROOT_URLCONF = "core.urls"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # AUTH_USER_MODEL = "user.User"
 
@@ -42,18 +42,14 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
-    # Crispy Forms
     "phonenumber_field",
     "crispy_forms",
     "crispy_bootstrap5",
 
-    # YOUR APPS
     "src.services.user",
-
 ]
 
 
-# GOOGLE SETTINGS
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_USE_TLS = True
 EMAIL_PORT = "587"
@@ -62,7 +58,6 @@ DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
 EMAIL_HOST_USER = env("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
 
-# PHONE NUMBER SETTINGS
 PHONENUMBER_DEFAULT_REGION = "PK"
 PHONENUMBER_DEFAULT_FORMAT = "NATIONAL"
 
@@ -92,7 +87,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "root.wsgi.application"
+WSGI_APPLICATION = "core.wsgi.application"
 
 
 if ENVIRONMENT == "server":
@@ -168,5 +163,4 @@ LOGOUT_ON_PASSWORD_CHANGE = False
 ACCOUNT_EMAIL_VERIFICATION = "none"
 
 MFA_ADAPTER = "allauth.mfa.adapter.DefaultMFAAdapter"
-
 ACCOUNT_ADAPTER = "src.web.accounts.adapters.MyAccountAdapter"
