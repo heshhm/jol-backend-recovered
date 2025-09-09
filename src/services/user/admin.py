@@ -1,3 +1,19 @@
 from django.contrib import admin
+from .models import User, UserProfile
 
-# Register your models here.
+class UserAdmin(admin.ModelAdmin):
+    list_display = ('id', 'username', 'email', 'first_name', 'last_name', 'is_active', 'is_staff', 'is_superuser', 'created_at', 'updated_at')
+    list_filter = ('is_active', 'is_staff', 'is_superuser', 'created_at', 'updated_at')
+    search_fields = ('username', 'email', 'first_name', 'last_name')
+    ordering = ('-created_at',)
+    readonly_fields = ('created_at', 'updated_at')
+    fields = ('username', 'password', 'first_name', 'last_name', 'email', 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions', 'last_login', 'date_joined', 'created_at', 'updated_at')
+
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'bio', 'location', 'birth_date')
+    search_fields = ('user__username', 'user__email', 'location')
+    list_filter = ('birth_date',)
+    ordering = ('user',)
+
+admin.site.register(User, UserAdmin)
+admin.site.register(UserProfile, UserProfileAdmin)

@@ -1,0 +1,55 @@
+# Folder Structure Log
+Scanned: C:\personalData\devProjects\jaaloo-backend
+Date:    2025-09-09 12:22:49
+Python:  3.13.5
+Skipped: .venv, .git, .idea
+
+jaaloo-backend/
+├── .git/ [skipped]
+├── .idea/ [skipped]
+├── .venv/ [skipped]
+├── core/
+│   ├── __pycache__/
+│   │   ├── __init__.cpython-313.pyc  (156.00 B)
+│   │   ├── settings.cpython-313.pyc  (4.85 KB)
+│   │   ├── urls.cpython-313.pyc  (1020.00 B)
+│   │   └── wsgi.cpython-313.pyc  (637.00 B)
+│   ├── __init__.py  (0.00 B)
+│   ├── asgi.py  (401.00 B)
+│   ├── settings.py  (4.65 KB)
+│   ├── urls.py  (782.00 B)
+│   └── wsgi.py  (401.00 B)
+├── src/
+│   ├── __pycache__/
+│   │   └── __init__.cpython-313.pyc  (155.00 B)
+│   ├── services/
+│   │   ├── __pycache__/
+│   │   │   └── __init__.cpython-313.pyc  (164.00 B)
+│   │   ├── user/
+│   │   │   ├── __pycache__/
+│   │   │   │   ├── __init__.cpython-313.pyc  (169.00 B)
+│   │   │   │   ├── admin.cpython-313.pyc  (213.00 B)
+│   │   │   │   ├── apps.cpython-313.pyc  (542.00 B)
+│   │   │   │   └── models.cpython-313.pyc  (210.00 B)
+│   │   │   ├── migrations/
+│   │   │   │   ├── __pycache__/
+│   │   │   │   │   └── __init__.cpython-313.pyc  (180.00 B)
+│   │   │   │   └── __init__.py  (0.00 B)
+│   │   │   ├── __init__.py  (0.00 B)
+│   │   │   ├── admin.py  (66.00 B)
+│   │   │   ├── apps.py  (159.00 B)
+│   │   │   ├── models.py  (60.00 B)
+│   │   │   ├── tests.py  (63.00 B)
+│   │   │   └── views.py  (66.00 B)
+│   │   └── __init__.py  (0.00 B)
+│   └── __init__.py  (0.00 B)
+├── .env  (714.00 B)
+├── .gitignore  (568.00 B)
+├── db.sqlite3  (0.00 B)
+├── exampe.env  (691.00 B)
+├── log.txt  (2.56 KB)
+├── manage.py  (682.00 B)
+├── requirements.txt  (394.00 B)
+└── rootreader.py  (4.32 KB)
+
+Summary: 10 directories, 33 files, total size 24.67 KB
