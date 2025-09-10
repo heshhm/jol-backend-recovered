@@ -74,6 +74,7 @@ INSTALLED_APPS = [
     "phonenumber_field",
     "crispy_forms",
     "crispy_bootstrap5",
+    "drf_yasg",
 
     # Local apps
     "src.services.user",
