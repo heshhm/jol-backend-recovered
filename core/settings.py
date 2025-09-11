@@ -37,7 +37,7 @@ ACCOUNT_USER_MODEL_USERNAME_FIELD = "username"
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = True
 ACCOUNT_AUTHENTICATION_METHOD = "username_email"
-ACCOUNT_EMAIL_VERIFICATION = "optional"  # or "mandatory"
+ACCOUNT_EMAIL_VERIFICATION = "optional"
 ACCOUNT_LOGOUT_ON_GET = True
 SOCIALACCOUNT_EMAIL_VERIFICATION = "none"
 ACCOUNT_UNIQUE_EMAIL = True
@@ -157,8 +157,5 @@ DJANGORESIZED_DEFAULT_FORCE_FORMAT = "JPEG"
 DJANGORESIZED_DEFAULT_FORMAT_EXTENSIONS = {"JPEG": ".jpg", "PNG": ".png", "GIF": ".gif"}
 DJANGORESIZED_DEFAULT_NORMALIZE_ROTATION = True
 
-# ======================================================================================
-# PHONE NUMBER CONFIGURATION
-# ======================================================================================
 PHONENUMBER_DEFAULT_REGION = "PK"
 PHONENUMBER_DEFAULT_FORMAT = "NATIONAL"
