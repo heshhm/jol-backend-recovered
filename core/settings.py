@@ -59,7 +59,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    'django.contrib.flatpages',
 
     # All auth
     "django.contrib.sites",
@@ -70,6 +69,7 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "dj_rest_auth",
     "dj_rest_auth.registration",
+    "allauth.socialaccount.providers.google",
 
     # Third-party apps
     "phonenumber_field",
@@ -90,7 +90,6 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
-    "django.contrib.flatpages.middleware.FlatpageFallbackMiddleware",
 ]
 
 TEMPLATES = [
