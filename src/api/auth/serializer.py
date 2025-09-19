@@ -1,6 +1,5 @@
 from rest_framework import serializers
-from src.services.users.models import User
-from src.services.wallet.models import Wallet
+from src.services.user.models import User, UserWallet
 
 
 class UserWalletSerializer(serializers.ModelSerializer):
@@ -11,7 +10,7 @@ class UserWalletSerializer(serializers.ModelSerializer):
     """
 
     class Meta:
-        model = Wallet
+        model = UserWallet
         fields = [
             'total_coins', 'used_coins', 'available_coins'
         ]

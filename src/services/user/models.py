@@ -38,3 +38,26 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return f"Profile of {self.user.username}"
+
+
+class UserWallet(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='wallet')
+
+    total_coins = models.IntegerField(default=0)
+    used_coins = models.IntegerField(default=0)
+    available_coins = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f"Wallet of {self.user.username}"
+
+    def increment_coins(self, amount):
+        self.total_coins += amount
+        self.available_coins += amount
+        self.save()
+
+    def decrement_coins(self, amount):
+        if amount > self.available_coins:
+            raise ValueError("Insufficient available coins")
+        self.used_coins += amount
+        self.available_coins -= amount
+        self.save()
