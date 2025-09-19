@@ -44,16 +44,18 @@ class AppleConnect(SocialConnectView):
 
 
 class CustomLoginView(LoginView):
-    """ Custom login view that generates a new auth token for the user """
+    """
+    Custom login view that regenerates token on successful login.
+    """
     serializer_class = LoginSerializer
 
-    def finalize_response(self, request, response, *args, **kwargs):
-        response = super().finalize_response(request, response, *args, **kwargs)
-        if request.user.is_authenticated:
-            user = request.user
-            Token.objects.filter(user=user).delete()
-            new_token = Token.objects.create(user=user)
-            response.data['key'] = new_token.key
+    def get_response(self):
+        user = self.user  # set during serializer validation
+        Token.objects.filter(user=user).delete()
+        new_token = Token.objects.create(user=user)
+
+        response = super().get_response()
+        response.data['key'] = new_token.key
         return response
 
 
