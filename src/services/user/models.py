@@ -12,6 +12,9 @@ class User(AbstractUser):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def get_wallet(self):
+        return self.wallet
+
 
 def user_avatar_path(instance, filename):
     ext = filename.split(".")[-1]

@@ -45,7 +45,8 @@ class AppleConnect(SocialConnectView):
 
 class CustomLoginView(LoginView):
     """
-    Custom login view that regenerates token on successful login.
+    Custom login view that regenerates token on successful login. Deletes the old token
+    and creates a new one to enhance security. and no multiple active tokens exist for a user -> no multiple devices at a time.
     """
     serializer_class = LoginSerializer
 
