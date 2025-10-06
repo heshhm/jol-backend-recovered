@@ -69,7 +69,9 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "dj_rest_auth",
     "dj_rest_auth.registration",
-    "allauth.socialaccount.providers.google",
+    # O AUTH Providers
+    'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.apple',
 
     # Third-party apps
     "phonenumber_field",
@@ -112,6 +114,12 @@ TEMPLATES = [
 # Crispy forms
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',  
+]
+
 
 if ENVIRONMENT == "server":
     DATABASES = {

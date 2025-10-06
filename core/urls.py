@@ -12,6 +12,8 @@ handler500 = handler500
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('src.api.urls')),
+
+    path('accounts/', include('allauth.urls')),
 ]
 
 urlpatterns += [
