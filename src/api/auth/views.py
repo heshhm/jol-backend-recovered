@@ -84,31 +84,29 @@ class UserWalletUpdateAPIView(GenericAPIView):
         coins = request.data.get('coins')
         coin_type = request.data.get('type')
         user_wallet = request.user.get_wallet()
-        if coin_type == 'increment':
-            user_wallet.total_coins += coins
-            user_wallet.available_coins += coins
-            user_wallet.save()
-            return Response(
-                data={'message': 'Coins added successfully'},
-                status=status.HTTP_200_OK
-            )
-        elif coin_type == 'decrement':
-            if user_wallet.available_coins < coins:
+
+        try:
+            if coin_type == 'increment':
+                user_wallet.increment_coins(coins)
                 return Response(
-                    data={'error': 'Insufficient coins'},
-                    status=status.HTTP_400_BAD_REQUEST
+                    data={'message': 'Coins added successfully'},
+                    status=status.HTTP_200_OK
                 )
-            user_wallet.available_coins -= coins
-            user_wallet.used_coins += coins
-            user_wallet.save()
+            elif coin_type == 'decrement':
+                user_wallet.decrement_coins(coins)
+                return Response(
+                    data={'message': 'Coins deducted successfully'},
+                    status=status.HTTP_200_OK
+                )
             return Response(
-                data={'message': 'Coins deducted successfully'},
-                status=status.HTTP_200_OK
+                data={'error': 'Invalid coin type'},
+                status=status.HTTP_400_BAD_REQUEST
             )
-        return Response(
-            data={'error': 'Invalid coin type'},
-            status=status.HTTP_400_BAD_REQUEST
-        )
+        except ValueError as e:
+            return Response(
+                data={'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class DeactivateUserAPIView(APIView):
@@ -121,8 +119,7 @@ class DeactivateUserAPIView(APIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         password = serializer.validated_data['password']
-        user = authenticate(email=request.user.email, password=password)
-        return user
+        return True if request.user.check_password(password) else False
 
     def post(self, request, *args, **kwargs):
         user = self._validate_password(request)

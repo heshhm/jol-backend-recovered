@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, UserProfile
+from .models import User, UserProfile, UserWallet
 
 class UserAdmin(admin.ModelAdmin):
     list_display = ('id', 'username', 'email', 'first_name', 'last_name', 'is_active', 'is_staff', 'is_superuser', 'created_at', 'updated_at')
@@ -15,5 +15,17 @@ class UserProfileAdmin(admin.ModelAdmin):
     list_filter = ('birth_date',)
     ordering = ('user',)
 
+class UserWalletAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'total_coins', 'available_coins', 'used_coins')
+    search_fields = ('user__username', 'user__email')
+    list_filter = ('total_coins', 'available_coins', 'used_coins')
+    ordering = ('user',)
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj:  # In edit mode
+            return 'user', 'created_at', 'updated_at'
+        return 'created_at', 'updated_at'
+
 admin.site.register(User, UserAdmin)
 admin.site.register(UserProfile, UserProfileAdmin)
+admin.site.register(UserWallet, UserWalletAdmin)
