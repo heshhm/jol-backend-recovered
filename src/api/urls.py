@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.urls import path, include, re_path
 
 from rest_framework import permissions
@@ -19,6 +20,9 @@ schema_view = get_schema_view(
 )
 
 
+def health_check(request):
+    return JsonResponse({"status": "OK"})
+
 urlpatterns = [
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     path('', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
@@ -28,4 +32,5 @@ urlpatterns = [
     path("auth/registration/", include("dj_rest_auth.registration.urls")),
 
     path("v1/", include("src.api.v1.urls")),
+    path("health/", health_check, name="health_check"),
 ]

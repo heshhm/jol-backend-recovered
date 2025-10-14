@@ -80,6 +80,7 @@ class UserWalletUpdateAPIView(GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = CoinSerializer
 
+    #noinspection PyMethodMayBeStatic
     def post(self, request, *args, **kwargs):
         coins = request.data.get('coins')
         coin_type = request.data.get('type')
@@ -119,7 +120,7 @@ class DeactivateUserAPIView(APIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         password = serializer.validated_data['password']
-        return True if request.user.check_password(password) else False
+        return request.user if request.user.check_password(password) else None
 
     def post(self, request, *args, **kwargs):
         user = self._validate_password(request)

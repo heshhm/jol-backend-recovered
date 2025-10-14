@@ -6,6 +6,10 @@ from django_resized import ResizedImageField
 import os
 import uuid
 
+def user_avatar_path(instance, filename):
+    ext = filename.split(".")[-1]
+    return f"auth_user_avatar/{instance.id}/{uuid.uuid4()}.{ext}"
+
 
 class User(AbstractUser):
 
@@ -14,11 +18,6 @@ class User(AbstractUser):
 
     def get_wallet(self):
         return self.wallet
-
-
-def user_avatar_path(instance, filename):
-    ext = filename.split(".")[-1]
-    return f"auth_user_avatar/{instance.id}/{uuid.uuid4()}.{ext}"
 
 
 class UserProfile(models.Model):

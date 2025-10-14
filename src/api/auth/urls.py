@@ -17,7 +17,6 @@ urlpatterns = [
     path('password/change/', PasswordChangeView.as_view(), name='rest_password_change'),
     path('password/reset/', PasswordResetView.as_view(), name='rest_password_reset'),
     re_path(r'^password/reset/confirm/$', PasswordResetConfirmView.as_view(), name='rest_password_reset_confirm'),
-    re_path('registration/', include('dj_rest_auth.registration.urls')),
     path('deactivate/', DeactivateUserAPIView.as_view(), name='deactivate'),
     path('delete/', DeleteUserAPIView.as_view(), name='delete_user'),
 
