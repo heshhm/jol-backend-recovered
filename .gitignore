@@ -44,3 +44,6 @@ node_modules/
 # Mac / Windows trash
 .DS_Store
 Thumbs.db
+
+# Logs
+.out_dir_structure.txt

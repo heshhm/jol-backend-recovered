@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # root_reader.py y --skip .venv .git .idea
-# Reads a folder's structure and saves a log.txt (tree-style) with counts and sizes.
+# Reads a folder's structure and saves a out_dir_strucuture.txt (tree-style) with counts and sizes.
+# Usage: python rootreader.py . --skip .venv .git .idea __pycache__
 
 import os
 import sys
@@ -79,7 +80,7 @@ def build_tree(root: str, skip_dirs: List[str]) -> Tuple[List[str], int, int, in
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Read a folder structure and save a tree-style log.txt."
+        description="Read a folder structure and save a tree-style out_dir_strucuture.txt."
     )
     parser.add_argument(
         "path",
@@ -89,8 +90,8 @@ def main():
     )
     parser.add_argument(
         "-o", "--output",
-        default="log.txt",
-        help="Output file path (default: log.txt)"
+        default="out_dir_strucuture.txt",
+        help="Output file path (default: out_dir_strucuture.txt)"
     )
     parser.add_argument(
         "--skip",
@@ -131,7 +132,7 @@ def main():
         print(f"Error writing to {out_path}: {e}", file=sys.stderr)
         sys.exit(2)
 
-    print(f"Wrote {out_path}")
+    print(f"Results: {out_path}")
 
 if __name__ == "__main__":
     main()

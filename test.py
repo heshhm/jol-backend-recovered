@@ -2,7 +2,8 @@ import requests
 import json
 import textwrap
 
-BASE_URL = "http://127.0.0.1:8000/api/auth"
+# BASE_URL = "http://127.0.0.1:8000/api/auth"
+BASE_URL = "https://nonabstemiously-stocky-cynthia.ngrok-free.dev/api/auth"
 session = requests.Session()
 
 
@@ -97,8 +98,8 @@ def logout_user():
 def run_flow():
     print("\n--- AUTH API TEST FLOW ---\n")
 
-    username = "apitestuser"
-    email = "apitest@example.com"
+    username = "bong"
+    email = "bong@example.com"
     password = "strongpassword123"
     new_pw = "newpassword123"
 

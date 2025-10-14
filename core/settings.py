@@ -78,6 +78,7 @@ INSTALLED_APPS = [
     "crispy_forms",
     "crispy_bootstrap5",
     "drf_yasg",
+    "django_extensions",
 
     # Local apps
     "src.services.user",
