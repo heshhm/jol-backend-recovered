@@ -8,10 +8,9 @@ session = requests.Session()
 
 def pretty_print(title, res):
     print(f"\n[{title}] — {res.status_code}")
-    content_type = res.headers.get("Content-Type", "")
-    if "application/json" in content_type:
+    try:
         print(json.dumps(res.json(), indent=4))
-    else:
+    except Exception:
         snippet = res.text.strip().replace("\n", " ")
         print(textwrap.shorten(snippet, width=300, placeholder=" ..."))
 
@@ -20,13 +19,13 @@ def set_auth(token):
     session.headers.update({"Authorization": f"Token {token}"})
 
 
-def register_user():
+def register_user(username, email, password):
     url = f"{BASE_URL}/registration/"
     data = {
-        "username": "testuse1r",
-        "email": "t1est@example.com",
-        "password1": "strongpassword123",
-        "password2": "strongpassword123"
+        "username": username,
+        "email": email,
+        "password1": password,
+        "password2": password
     }
     res = session.post(url, json=data)
     pretty_print("REGISTER", res)
@@ -34,15 +33,14 @@ def register_user():
         token = res.json()["key"]
         set_auth(token)
         return token
+    elif res.status_code == 400 and "username" in res.json():
+        return login_user(email, password)
     return None
 
 
-def login_user():
+def login_user(email, password):
     url = f"{BASE_URL}/login/"
-    data = {
-        "email": "t1est@example.com",
-        "password": "strongpassword123"
-    }
+    data = {"email": email, "password": password}
     res = session.post(url, json=data)
     pretty_print("LOGIN", res)
     if res.status_code == 200 and "key" in res.json():
@@ -58,7 +56,7 @@ def get_profile():
 
 
 def update_profile():
-    data = {"bio": "Updated bio text", "location": "Pakistan"}
+    data = {"first_name": "John", "last_name": "Doe"}
     res = session.patch(f"{BASE_URL}/profile/", json=data)
     pretty_print("UPDATE PROFILE", res)
 
@@ -69,24 +67,24 @@ def update_wallet():
     pretty_print("UPDATE WALLET", res)
 
 
-def change_password():
+def change_password(old_pw, new_pw):
     data = {
-        "old_password": "strongpassword123",
-        "new_password1": "newpassword123",
-        "new_password2": "newpassword123"
+        "old_password": old_pw,
+        "new_password1": new_pw,
+        "new_password2": new_pw
     }
     res = session.post(f"{BASE_URL}/password/change/", json=data)
     pretty_print("PASSWORD CHANGE", res)
 
 
-def deactivate_user():
-    data = {"password": "newpassword123"}
+def deactivate_user(password):
+    data = {"password": password}
     res = session.post(f"{BASE_URL}/deactivate/", json=data)
     pretty_print("DEACTIVATE USER", res)
 
 
-def delete_user():
-    data = {"password": "newpassword123"}
+def delete_user(password):
+    data = {"password": password}
     res = session.post(f"{BASE_URL}/delete/", json=data)
     pretty_print("DELETE USER", res)
 
@@ -96,25 +94,33 @@ def logout_user():
     pretty_print("LOGOUT", res)
 
 
-def run_all_tests():
-    print("\n--- AUTH API TEST FLOW ---")
+def run_flow():
+    print("\n--- AUTH API TEST FLOW ---\n")
 
-    token = register_user()
-    if not token:
-        token = login_user()
+    username = "apitestuser"
+    email = "apitest@example.com"
+    password = "strongpassword123"
+    new_pw = "newpassword123"
 
+    token = register_user(username, email, password)
     if not token:
-        print("❌ Authentication failed — cannot continue tests.")
+        print("❌ Could not authenticate — aborting tests.")
         return
 
     get_profile()
     update_profile()
     update_wallet()
-    change_password()
-    deactivate_user()
-    logout_user()
-    delete_user()
+    change_password(password, new_pw)
+
+    print("\n[RE-LOGIN AFTER PASSWORD CHANGE]")
+    session.headers.clear()
+    new_token = login_user(email, new_pw)
+    if new_token:
+        get_profile()
+        deactivate_user(new_pw)
+        logout_user()
+        delete_user(new_pw)
 
 
 if __name__ == "__main__":
-    run_all_tests()
+    run_flow()
