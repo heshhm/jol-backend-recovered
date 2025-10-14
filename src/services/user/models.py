@@ -17,7 +17,11 @@ class User(AbstractUser):
     updated_at = models.DateTimeField(auto_now=True)
 
     def get_wallet(self):
-        return self.wallet
+        """
+        This is just being safe, wallet should be created on user creation via signals.
+        """
+        wallet, _ = UserWallet.objects.get_or_create(user=self)
+        return wallet
 
 
 class UserProfile(models.Model):

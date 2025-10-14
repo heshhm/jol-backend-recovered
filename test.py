@@ -23,8 +23,8 @@ def set_auth(token):
 def register_user():
     url = f"{BASE_URL}/registration/"
     data = {
-        "username": "testuser",
-        "email": "test@example.com",
+        "username": "testuse1r",
+        "email": "t1est@example.com",
         "password1": "strongpassword123",
         "password2": "strongpassword123"
     }
@@ -40,7 +40,7 @@ def register_user():
 def login_user():
     url = f"{BASE_URL}/login/"
     data = {
-        "email": "test@example.com",
+        "email": "t1est@example.com",
         "password": "strongpassword123"
     }
     res = session.post(url, json=data)
