@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # root_reader.py y --skip .venv .git .idea
-# Reads a folder's structure and saves a out_dir_strucuture.txt (tree-style) with counts and sizes.
+# Reads a folder's structure and saves a out_dir_structure.txt (tree-style) with counts and sizes.
 # Usage: python rootreader.py . --skip .venv .git .idea __pycache__
 
 import os
@@ -80,7 +80,7 @@ def build_tree(root: str, skip_dirs: List[str]) -> Tuple[List[str], int, int, in
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Read a folder structure and save a tree-style out_dir_strucuture.txt."
+        description="Read a folder structure and save a tree-style out_dir_structure.txt."
     )
     parser.add_argument(
         "path",
@@ -90,8 +90,8 @@ def main():
     )
     parser.add_argument(
         "-o", "--output",
-        default="out_dir_strucuture.txt",
-        help="Output file path (default: out_dir_strucuture.txt)"
+        default="out_dir_structure.txt",
+        help="Output file path (default: out_dir_structure.txt)"
     )
     parser.add_argument(
         "--skip",
