@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from src.services.user.models import User, UserWallet
+from src.services.user.models import User, UserWallet, UserProfile
 
 
 class UserWalletSerializer(serializers.ModelSerializer):
@@ -17,8 +17,6 @@ class UserWalletSerializer(serializers.ModelSerializer):
         ]
 
 
-
-
 class CoinSerializer(serializers.Serializer):
     """
     Serializes the coin data for user wallet updates.
@@ -27,6 +25,17 @@ class CoinSerializer(serializers.Serializer):
     coins = serializers.IntegerField(required=True)
     type = serializers.ChoiceField(choices=['increment', 'decrement'], required=True)
 
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = [
+            'bio', 'location', 'birth_date', 'avatar',
+            'referral_code', 'referred_by', 'total_referrals'
+        ]
+        read_only_fields = ['referral_code', 'total_referrals']
+
+
 class UserSerializer(serializers.ModelSerializer):
     """
     Serializes user data for API responses.
@@ -34,10 +43,11 @@ class UserSerializer(serializers.ModelSerializer):
     The primary key and email are read-only.
     """
     wallet = UserWalletSerializer(read_only=True, source='get_wallet')
+    profile = UserProfileSerializer(read_only=True)  # <-- nested profile serializer
 
     class Meta:
         model = User
         fields = [
-            'pk', 'email', 'username', 'first_name', 'last_name', 'wallet'
+            'pk', 'email', 'username', 'first_name', 'last_name', 'wallet', 'profile'
         ]
         read_only_fields = ['pk', 'email']

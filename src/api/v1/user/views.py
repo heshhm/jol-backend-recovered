@@ -3,11 +3,16 @@ from rest_framework.generics import RetrieveUpdateAPIView, GenericAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
+from django.db import transaction
+from django.db.models import F
+
 from src.services.user.models import UserProfile
-
-REFERRAL_BONUS = 100  # [heshhm] move this to commons model for easier access post launch
-
 from src.api.v1.user.serializers import CoinSerializer, UserSerializer
+
+# [heshhm] move this to commons model for easier access post launch
+REFERRAL_BONUS_REFERRER = 100   # THE PERSON WHO REFERS IE THE REFERRAL CODE OWNER
+REFERRAL_BONUS_REFEREE = 0  # THE PERSON BEING REFERRED IE THE NEW USER
+REFERRALS_LIMIT = 8
 
 
 class UserWalletUpdateAPIView(GenericAPIView):
@@ -65,28 +70,41 @@ class ProcessReferralAPIView(APIView):
     request.user is the new user being referred.
     """
     def post(self, request):
-        referral_code = request.data.get("referral_code")
-        profile = request.user.profile
+        raw_code = request.data.get("referral_code", "").strip().upper()
+        if not raw_code:
+            return Response({"message": "Referral processed successfully"}, status=status.HTTP_200_OK)
 
-        # If user already has referred_by, ignore [ this should not be handled like this ]
-        if profile.referred_by or not referral_code:
-            return Response({"message": "Referral processed"}, status=status.HTTP_200_OK)
+        profile = request.user.profile
+        if profile.referred_by:
+            return Response({"message": "Referral processed successfully"}, status=status.HTTP_200_OK)
 
         try:
-            referrer = UserProfile.objects.get(referral_code=referral_code)
+            referrer = UserProfile.objects.get(referral_code=raw_code)
         except UserProfile.DoesNotExist:
-            # Invalid code → Tell the user but no error emitted
-            return Response({"message": "Provided Code is wrong please re-check"}, status=status.HTTP_200_OK)
+            return Response({"message": "Referral processed successfully"}, status=status.HTTP_200_OK)
 
-        # Assign referred_by
+        # Always track who referred them (for analytics)
         profile.referred_by = referrer
+
+        referrer_rewarded = False
+        with transaction.atomic():
+            # Lock and check limit
+            referrer_locked = UserProfile.objects.select_for_update().get(id=referrer.id)
+
+            if referrer_locked.total_referrals < REFERRALS_LIMIT:
+                updated = UserProfile.objects.filter(
+                    id=referrer.id,
+                    total_referrals__lt=REFERRALS_LIMIT
+                ).update(total_referrals=F('total_referrals') + 1)
+
+                if updated:
+                    referrer_locked.user.get_wallet().increment_coins(REFERRAL_BONUS_REFERRER)
+                    referrer_rewarded = True
+
+        # Reward referee only if referrer was rewarded
+        if referrer_rewarded:
+            profile.user.get_wallet().increment_coins(REFERRAL_BONUS_REFEREE)
+
         profile.save()
 
-        # Reward coins
-        referrer.user.get_wallet().increment_coins(REFERRAL_BONUS)
-
-        # Increment referrer's total referrals
-        referrer.total_referrals += 1
-        referrer.save()
-
-        return Response({"message": "Referral processed"}, status=status.HTTP_200_OK)
+        return Response({"message": "Referral processed successfully"}, status=status.HTTP_200_OK)

@@ -18,7 +18,7 @@ class UserProfileAdmin(admin.ModelAdmin):
 class UserWalletAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'total_coins', 'available_coins', 'used_coins')
     search_fields = ('user__username', 'user__email')
-    list_filter = ('total_coins', 'available_coins', 'used_coins')
+    list_filter = ('total_coins', 'used_coins')
     ordering = ('user',)
 
     def get_readonly_fields(self, request, obj=None):
