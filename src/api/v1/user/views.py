@@ -1,6 +1,11 @@
 from rest_framework import permissions, status
 from rest_framework.generics import RetrieveUpdateAPIView, GenericAPIView
+from rest_framework.views import APIView
 from rest_framework.response import Response
+
+from src.services.user.models import UserProfile
+
+REFERRAL_BONUS = 100  # [heshhm] move this to commons model for easier access post launch
 
 from src.api.v1.user.serializers import CoinSerializer, UserSerializer
 
@@ -53,3 +58,35 @@ class UserRetrieveChangeAPIView(RetrieveUpdateAPIView):
         """ Get the current authenticated user """
         return self.request.user
 
+
+class ProcessReferralAPIView(APIView):
+    """
+    Called after onboarding when a user provides a referral code.
+    request.user is the new user being referred.
+    """
+    def post(self, request):
+        referral_code = request.data.get("referral_code")
+        profile = request.user.profile
+
+        # If user already has referred_by, ignore [ this should not be handled like this ]
+        if profile.referred_by or not referral_code:
+            return Response({"message": "Referral processed"}, status=status.HTTP_200_OK)
+
+        try:
+            referrer = UserProfile.objects.get(referral_code=referral_code)
+        except UserProfile.DoesNotExist:
+            # Invalid code → Tell the user but no error emitted
+            return Response({"message": "Provided Code is wrong please re-check"}, status=status.HTTP_200_OK)
+
+        # Assign referred_by
+        profile.referred_by = referrer
+        profile.save()
+
+        # Reward coins
+        referrer.user.get_wallet().increment_coins(REFERRAL_BONUS)
+
+        # Increment referrer's total referrals
+        referrer.total_referrals += 1
+        referrer.save()
+
+        return Response({"message": "Referral processed"}, status=status.HTTP_200_OK)
