@@ -1,3 +1,4 @@
+import random, string
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -33,6 +34,11 @@ class UserProfile(models.Model):
     location = models.CharField(max_length=255, blank=True, null=True)
     birth_date = models.DateField(blank=True, null=True)
 
+    # --- Referral fields ---
+    referral_code = models.CharField(max_length=6, unique=True, blank=True)
+    referred_by = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name='referrals')
+    total_referrals = models.PositiveIntegerField(default=0)
+
     avatar = ResizedImageField(
         size=[300, 300],
         crop=['middle', 'center'],
@@ -43,6 +49,23 @@ class UserProfile(models.Model):
         null=True,
         blank=True,
     )
+
+
+    def save(self, *args, **kwargs):
+        """
+        Override save method to generate referral code if not present.
+        """
+        if not self.referral_code:
+            self.referral_code = self.generate_referral_code()
+        super().save(*args, **kwargs)
+
+    # noinspection PyMethodMayBeStatic
+    def generate_referral_code(self):
+        """Generate a unique 6-character alphanumeric code"""
+        while True:
+            code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+            if not UserProfile.objects.filter(referral_code=code).exists():
+                return code
 
     def __str__(self):
         return f"Profile of {self.user.username}"

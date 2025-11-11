@@ -24,6 +24,8 @@ urlpatterns = [
 urlpatterns += [
     path('google/', GoogleLogin.as_view(), name='google_login'),
     path('google-connect/', GoogleConnect.as_view(), name='google_connect'),
-    path('apple/', AppleLogin.as_view(), name='apple_login'),
-    path('apple-connect/', AppleConnect.as_view(), name='apple_connect'),
+
+    # APPLE NOT CONFIGURED YET
+    # path('apple/', AppleLogin.as_view(), name='apple_login'),
+    # path('apple-connect/', AppleConnect.as_view(), name='apple_connect'),
 ]
