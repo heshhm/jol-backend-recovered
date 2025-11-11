@@ -5,6 +5,34 @@ from dj_rest_auth.registration.serializers import RegisterSerializer
 from rest_framework import serializers
 
 
+class UserSerializer(serializers.ModelSerializer):
+    """
+    Serializes user data for API responses.
+    Includes fields for primary key, email, username, first name, and last name.
+    The primary key and email are read-only.
+    """
+    wallet = UserWalletSerializer(read_only=True, source='get_wallet')
+
+    class Meta:
+        model = User
+        fields = [
+            'pk', 'email', 'username', 'first_name', 'last_name', 'wallet'
+        ]
+        read_only_fields = ['pk', 'email']
+
+class UserWalletSerializer(serializers.ModelSerializer):
+    """
+    Serializes user wallet data for API responses.
+    Includes fields for total coins, used coins, and available coins.
+    All fields are read-only.
+    """
+
+    class Meta:
+        model = UserWallet
+        fields = [
+            'total_coins', 'used_coins', 'available_coins'
+        ]
+
 class CustomRegisterSerializer(RegisterSerializer):
     """
     Custom registration serializer that works with the new allauth API
@@ -43,3 +71,11 @@ class CustomRegisterSerializer(RegisterSerializer):
             "password2": self.validated_data.get("password2", ""),
             "email": self.validated_data.get("email", ""),
         }
+
+class CoinSerializer(serializers.Serializer):
+    """
+    Serializes the coin data for user wallet updates.
+    The coins field is required and must be an integer.
+    """
+    coins = serializers.IntegerField(required=True)
+    type = serializers.ChoiceField(choices=['increment', 'decrement'], required=True)
