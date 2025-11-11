@@ -2,8 +2,8 @@ import requests
 import json
 import textwrap
 
-# BASE_URL = "http://127.0.0.1:8000/api/auth"
-BASE_URL = "https://nonabstemiously-stocky-cynthia.ngrok-free.dev/api/auth"
+BASE_URL = "http://127.0.0.1:8000/api"
+# BASE_URL = "https://nonabstemiously-stocky-cynthia.ngrok-free.dev/api/auth"
 session = requests.Session()
 
 
@@ -21,7 +21,7 @@ def set_auth(token):
 
 
 def register_user(username, email, password):
-    url = f"{BASE_URL}/registration/"
+    url = f"{BASE_URL}/auth/registration/"
     data = {
         "username": username,
         "email": email,
@@ -40,7 +40,7 @@ def register_user(username, email, password):
 
 
 def login_user(email, password):
-    url = f"{BASE_URL}/login/"
+    url = f"{BASE_URL}/auth/login/"
     data = {"email": email, "password": password}
     res = session.post(url, json=data)
     pretty_print("LOGIN", res)
@@ -51,20 +51,20 @@ def login_user(email, password):
     return None
 
 
-def get_profile():
-    res = session.get(f"{BASE_URL}/profile/")
+def  get_profile():
+    res = session.get(f"{BASE_URL}/v1/user/profile/")
     pretty_print("GET PROFILE", res)
 
 
 def update_profile():
     data = {"first_name": "John", "last_name": "Doe"}
-    res = session.patch(f"{BASE_URL}/profile/", json=data)
+    res = session.patch(f"{BASE_URL}/v1/user/profile/", json=data)
     pretty_print("UPDATE PROFILE", res)
 
 
 def update_wallet():
     data = {"coins": 100, "type": "increment"}
-    res = session.post(f"{BASE_URL}/wallet-update/", json=data)
+    res = session.post(f"{BASE_URL}/v1/user/wallet-update/", json=data)
     pretty_print("UPDATE WALLET", res)
 
 
@@ -74,33 +74,33 @@ def change_password(old_pw, new_pw):
         "new_password1": new_pw,
         "new_password2": new_pw
     }
-    res = session.post(f"{BASE_URL}/password/change/", json=data)
+    res = session.post(f"{BASE_URL}/auth/password/change/", json=data)
     pretty_print("PASSWORD CHANGE", res)
 
 
 def deactivate_user(password):
     data = {"password": password}
-    res = session.post(f"{BASE_URL}/deactivate/", json=data)
+    res = session.post(f"{BASE_URL}/auth/deactivate/", json=data)
     pretty_print("DEACTIVATE USER", res)
 
 
 def delete_user(password):
     data = {"password": password}
-    res = session.post(f"{BASE_URL}/delete/", json=data)
+    res = session.post(f"{BASE_URL}/auth/delete/", json=data)
     pretty_print("DELETE USER", res)
 
 
 def logout_user():
-    res = session.post(f"{BASE_URL}/logout/")
+    res = session.post(f"{BASE_URL}/auth/logout/")
     pretty_print("LOGOUT", res)
 
 
 def run_flow():
     print("\n--- AUTH API TEST FLOW ---\n")
 
-    username = "bong"
-    email = "bong@example.com"
-    password = "strongpassword123"
+    username = "bon323dg"
+    email = "bong@ex3dample.com"
+    password = "str3ongpassword123"
     new_pw = "newpassword123"
 
     token = register_user(username, email, password)
