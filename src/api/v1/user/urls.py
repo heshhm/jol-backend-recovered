@@ -1,10 +1,17 @@
-from .views import UserWalletUpdateAPIView, UserRetrieveChangeAPIView, ProcessReferralAPIView
 from django.urls import path
+from .views import (
+    UserRetrieveUpdateAPIView,
+    UserProfileRetrieveUpdateAPIView,
+    UserWalletAPIView,
+    UserWalletUpdateAPIView,
+    ProcessReferralAPIView,
+)
 
 urlpatterns = [
-    path('profile/', UserRetrieveChangeAPIView.as_view(), name='user_retrieve_update'),
+    path('', UserRetrieveUpdateAPIView.as_view(), name='user_retrieve_update'),
+    path( 'profile/', UserProfileRetrieveUpdateAPIView.as_view(), name='user_profile_retrieve_update'),
+    path( 'wallet/', UserWalletAPIView.as_view(), name='user_wallet_retrieve' ),
 
-    path('wallet-update/', UserWalletUpdateAPIView.as_view(), name='wallet_update'),
-
-    path("process-referral/", ProcessReferralAPIView.as_view(), name="process-referral"),
+    path( 'wallet/adjust/', UserWalletUpdateAPIView.as_view(), name='user_wallet_update'),
+    path( 'process-referral/',  ProcessReferralAPIView.as_view(), name='process_referral'),
 ]

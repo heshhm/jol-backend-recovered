@@ -4,8 +4,8 @@ from dj_rest_auth.views import (
     LogoutView, PasswordChangeView, PasswordResetView, PasswordResetConfirmView,
 )
 from .views import (
-    CustomLoginView, DeactivateUserAPIView, DeleteUserAPIView, GoogleLogin, GoogleConnect,
-    AppleLogin, AppleConnect
+    CustomLoginView, DeactivateUserAPIView, GoogleLogin, GoogleConnect,
+    AppleLogin, AppleConnect, DeleteUserAPIView
 )
 
 urlpatterns = [
@@ -16,7 +16,7 @@ urlpatterns = [
     path('password/reset/', PasswordResetView.as_view(), name='rest_password_reset'),
     re_path(r'^password/reset/confirm/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>.+)/$', PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('deactivate/', DeactivateUserAPIView.as_view(), name='deactivate'),
-    path('delete/', DeleteUserAPIView.as_view(), name='delete_user'),
+    # path('delete/', DeleteUserAPIView.as_view(), name='delete_user'),
 
 ]
 
