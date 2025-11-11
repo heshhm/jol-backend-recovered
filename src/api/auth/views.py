@@ -7,13 +7,11 @@ from dj_rest_auth.views import LoginView
 from django.contrib.auth import authenticate
 from rest_framework import permissions, status
 from rest_framework.authtoken.models import Token
-from rest_framework.generics import RetrieveUpdateAPIView, GenericAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core.settings import GOOGLE_CALLBACK_ADDRESS, APPLE_CALLBACK_ADDRESS
-from src.api.auth.serializer import PasswordSerializer, UserSerializer, CoinSerializer
-
+from src.api.auth.serializer import PasswordSerializer
 
 class GoogleLogin(SocialLoginView):
     """ Handles Google social login """
@@ -58,9 +56,6 @@ class CustomLoginView(LoginView):
         response = super().get_response()
         response.data['key'] = new_token.key
         return response
-
-
-
 
 
 class DeactivateUserAPIView(APIView):

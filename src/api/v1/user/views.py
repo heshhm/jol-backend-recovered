@@ -1,3 +1,10 @@
+from rest_framework import permissions, status
+from rest_framework.generics import RetrieveUpdateAPIView, GenericAPIView
+from rest_framework.response import Response
+
+from src.api.v1.user.serializers import CoinSerializer, UserSerializer
+
+
 class UserWalletUpdateAPIView(GenericAPIView):
     """ Increment or decrement user wallet coins
     CHOICES = (
