@@ -12,8 +12,8 @@ from src.api.v1.user.serializers import (
 )
 
 # [heshhm] move this to commons model for easier access post launch
-REFERRAL_BONUS_REFERRER = 100   # CODE OWNER
-REFERRAL_BONUS_REFEREE = 50  # NEW USER
+CODE_OWNER_BONUS = 100   # CODE OWNER
+NEW_USER_BONUS = 50  # NEW USER
 REFERRALS_LIMIT = 7
 
 class UserWalletAPIView(APIView):
@@ -104,35 +104,36 @@ class ProcessReferralAPIView(APIView):
 
         # CHECK IF USER HAS ALREADY BEEN REFERRED OR IS USING THEIR OWN CODE
         # NIGGAS BE TRYNA CHEAT
-        profile = request.user.profile
-        if profile.referred_by or raw_code == profile.referral_code:
+        new_user_profile = request.user.profile
+        if new_user_profile.referred_by or raw_code == new_user_profile.referral_code:
             return Response({"message": "Referral processed successfully"})
 
         try:
-            referrer = UserProfile.objects.get(referral_code=raw_code)
+            code_owner = UserProfile.objects.get(referral_code=raw_code)
         except UserProfile.DoesNotExist:
             return Response({"message": "Referral processed successfully"})
 
-        profile.referred_by = referrer
+        # ALWAYS NO CHECKS
+        new_user_profile.referred_by = code_owner
 
-        referrer_rewarded = False
+        code_owner_rewarded = False
         with transaction.atomic():
-            # LOCK THE REFERRER & GIVE BONUS IF < LIMIT & SET REWARDED TO TRUE
-            referrer_locked = UserProfile.objects.select_for_update().get(id=referrer.id)
-            if referrer_locked.total_referrals < REFERRALS_LIMIT:
+            # LOCK THE CODE OWNER & GIVE BONUS IF < LIMIT & SET REWARDED TO TRUE
+            code_owner_locked = UserProfile.objects.select_for_update().get(id=code_owner.id)
+            if code_owner_locked.total_referrals < REFERRALS_LIMIT:
                 updated = UserProfile.objects.filter(
-                    id=referrer.id, total_referrals__lt=REFERRALS_LIMIT
+                    id=code_owner.id, total_referrals__lt=REFERRALS_LIMIT
                 ).update(total_referrals=F('total_referrals') + 1)
 
                 # THE > 0 CHECK IS BECAUSE THERE IS MOAL LEVEL VALIDATION FOR COIN
                 # INCREMENTS THAT CANT BE 0 MUST BE POSITIVE INTEGERS
-                if updated and REFERRAL_BONUS_REFERRER > 0:
-                    referrer_locked.user.get_wallet().increment_coins(REFERRAL_BONUS_REFERRER)
-                    referrer_rewarded = True
+                if updated and CODE_OWNER_BONUS > 0:
+                    code_owner_locked.user.get_wallet().increment_coins(CODE_OWNER_BONUS)
+                    code_owner_rewarded = True
 
         # GIVE BONUS TO THE NEW USER IF THE REFERRER WAS REWARDED
-        if referrer_rewarded and REFERRAL_BONUS_REFERRER > 0:
-            profile.user.get_wallet().increment_coins(REFERRAL_BONUS_REFEREE)
+        if code_owner_rewarded and NEW_USER_BONUS > 0:
+            new_user_profile.user.get_wallet().increment_coins(NEW_USER_BONUS)
 
-        profile.save()
+        new_user_profile.save()
         return Response({"message": "Referral processed successfully"})
