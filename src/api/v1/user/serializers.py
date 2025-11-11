@@ -2,6 +2,14 @@ from rest_framework import serializers
 
 from src.services.user.models import User, UserWallet, UserProfile
 
+class CoinSerializer(serializers.Serializer):
+    """
+    Serializes the coin data for user wallet updates.
+    The coins field is required and must be an integer.
+    """
+    coins = serializers.IntegerField(required=True)
+    type = serializers.ChoiceField(choices=['increment', 'decrement'], required=True)
+
 
 class UserWalletSerializer(serializers.ModelSerializer):
     """
@@ -15,15 +23,6 @@ class UserWalletSerializer(serializers.ModelSerializer):
         fields = [
             'total_coins', 'used_coins', 'available_coins'
         ]
-
-
-class CoinSerializer(serializers.Serializer):
-    """
-    Serializes the coin data for user wallet updates.
-    The coins field is required and must be an integer.
-    """
-    coins = serializers.IntegerField(required=True)
-    type = serializers.ChoiceField(choices=['increment', 'decrement'], required=True)
 
 
 class UserProfileSerializer(serializers.ModelSerializer):

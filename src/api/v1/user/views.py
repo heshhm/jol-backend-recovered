@@ -78,6 +78,10 @@ class ProcessReferralAPIView(APIView):
         if profile.referred_by:
             return Response({"message": "Referral processed successfully"}, status=status.HTTP_200_OK)
 
+        # CHECK IF REFERRAL CODE IS USERS OWN CODE ( NIGGA TRYNA CHEAT )
+        if raw_code == profile.referral_code:
+            return Response({"message": "Referral processed successfully"}, status=status.HTTP_200_OK)
+
         try:
             referrer = UserProfile.objects.get(referral_code=raw_code)
         except UserProfile.DoesNotExist:
