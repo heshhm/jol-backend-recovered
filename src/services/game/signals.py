@@ -11,7 +11,7 @@ def award_game_points(sender, instance, created, **kwargs):
     """
     On every new COMPLETED game:
     → Add calculated_points to UserProfile.total_game_points
-    → Atomic update (no race conditions)
+    → Atomic update with select_for_update (prevents race conditions with concurrent saves)
     """
     if not created or instance.status != sender.Status.COMPLETED:
         return
@@ -20,6 +20,7 @@ def award_game_points(sender, instance, created, **kwargs):
 
     with transaction.atomic():
         from src.services.user.models import UserProfile
-        UserProfile.objects.filter(user=instance.player).update(
+        # FIXED: Use select_for_update() to lock the row during update
+        UserProfile.objects.filter(user=instance.player).select_for_update().update(
             total_game_points=F("total_game_points") + points
         )

@@ -40,7 +40,7 @@ def get_user(token):
     Retrieves user account info (username, email, first_name, last_name, wallet summary, profile summary)
     """
     headers = {"Authorization": f"Token {token}"}
-    res = requests.get(f"{BASE_URL}/v1/user/", headers=headers)
+    res = requests.get(f"{BASE_URL}/v1/user/detail/", headers=headers)
     pretty_print("GET USER", res)
 
 
@@ -50,7 +50,7 @@ def update_user(token, first_name="John", last_name="Doe"):
     """
     headers = {"Authorization": f"Token {token}"}
     data = {"first_name": first_name, "last_name": last_name}
-    res = requests.patch(f"{BASE_URL}/v1/user/", json=data, headers=headers)
+    res = requests.patch(f"{BASE_URL}/v1/user/detail/", json=data, headers=headers)
     pretty_print("UPDATE USER", res)
 
 

@@ -11,6 +11,8 @@ from django.utils import timezone
 from django.db.models import Sum, When, Case, IntegerField, F
 from datetime import timedelta
 
+from src.services.user.models import UserProfile
+from django.db.models import Count
 
 class StandardResultsSetPagination(PageNumberPagination):
     page_size = 20
@@ -58,10 +60,29 @@ class LeaderboardView(APIView):
     ?period=today | this_week | this_month | all_time
     ?page=1&page_size=50
     """
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
         period = request.query_params.get("period", "all_time")
-        page_size = int(request.query_params.get("page_size", 50))
-        page = int(request.query_params.get("page", 1))
+
+        # Validate period
+        valid_periods = ["today", "this_week", "this_month", "all_time"]
+        if period not in valid_periods:
+            return Response(
+                {"error": f"Invalid period. Must be one of {valid_periods}"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Validate and constrain pagination parameters
+        try:
+            page_size = min(int(request.query_params.get("page_size", 50)), 100)
+            page = max(int(request.query_params.get("page", 1)), 1)
+        except ValueError:
+            return Response(
+                {"error": "page_size and page must be valid integers"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         offset = (page - 1) * page_size
 
         # Define time filters
@@ -82,6 +103,7 @@ class LeaderboardView(APIView):
             games_qs = games_qs.filter(timestamp__gte=start_date)
 
         # Aggregate points per user in the period
+        # FIXED: Remove -timestamp from order_by (it breaks aggregation since timestamp is not in group_by)
         leaderboard_data = (
             games_qs
             .values("player")
@@ -95,7 +117,7 @@ class LeaderboardView(APIView):
                 ),
                 games_played=Count("id")
             )
-            .order_by("-period_points", "-timestamp")  # tiebreaker: most recent
+            .order_by("-period_points")  # Only order by aggregated field
         )
 
         # Apply pagination
