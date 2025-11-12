@@ -32,6 +32,8 @@ class UserProfile(models.Model):
     location = models.CharField(max_length=255, blank=True, null=True)
     birth_date = models.DateField(blank=True, null=True)
 
+
+    # REFFERALS
     referral_code = models.CharField(max_length=8, unique=True, blank=True)
     referred_by = models.ForeignKey(
         'self', null=True, blank=True, on_delete=models.SET_NULL,
@@ -39,6 +41,12 @@ class UserProfile(models.Model):
     )
     total_referrals = models.PositiveIntegerField(default=0)
 
+    # GAME POINTS
+    total_game_points = models.PositiveBigIntegerField(
+        default=0,
+        db_index=True,
+        help_text="Total points earned from completed games"
+    )
     avatar = ResizedImageField(
         size=[300, 300], crop=['middle', 'center'], quality=85,
         force_format="JPEG", upload_to=user_avatar_path,

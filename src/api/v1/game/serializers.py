@@ -70,3 +70,12 @@ class GameHistorySerializer(serializers.ModelSerializer):
             "completion_time", "room_code", "position", "total_players"
         ]
         read_only_fields = fields
+
+class LeaderboardSerializer(serializers.Serializer):
+    rank = serializers.IntegerField(read_only=True)
+    user_id = serializers.CharField(source="user.id")
+    username = serializers.CharField(source="user.username")
+    email = serializers.CharField(source="user.email")
+    avatar = serializers.CharField(source="avatar.url", allow_null=True)
+    total_points = serializers.IntegerField()
+    games_played = serializers.IntegerField()

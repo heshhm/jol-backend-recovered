@@ -1,11 +1,14 @@
+# game/models.py
 from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
-from django.db.models import Index
+from django.db.models import Index, F
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.db import transaction
 
 
 class GameHistory(models.Model):
-
     """One row = one finished game. Stores ONLY what the API spec demands."""
 
     class GameType(models.TextChoices):
@@ -25,7 +28,7 @@ class GameHistory(models.Model):
         ABANDONED = "abandoned", "Abandoned"
         TIMED_OUT = "timed_out", "Timed Out"
 
-    # PK from frontend (match_id)
+    # Primary key from frontend
     match_id = models.UUIDField(
         primary_key=True,
         editable=False,
@@ -58,7 +61,7 @@ class GameHistory(models.Model):
     )
     hints_used = models.PositiveSmallIntegerField(default=0)
 
-    # Conditional / multiplayer-only fields
+    # Conditional / multiplayer-only
     completion_time = models.PositiveIntegerField(
         null=True,
         blank=True,
@@ -85,9 +88,9 @@ class GameHistory(models.Model):
     class Meta:
         verbose_name_plural = "Game History"
         indexes = [
-            Index(fields=["player", "-timestamp"]),          # fast personal history
-            Index(fields=["-timestamp"]),                    # global leaderboards
-            Index(fields=["room_code", "-timestamp"]),       # room results
+            Index(fields=["player", "-timestamp"]),          # Personal history
+            Index(fields=["-timestamp"]),                    # Global leaderboards
+            Index(fields=["room_code", "-timestamp"]),       # Room results
         ]
         constraints = [
             models.UniqueConstraint(fields=["match_id"], name="unique_match_id")
@@ -96,3 +99,91 @@ class GameHistory(models.Model):
 
     def __str__(self):
         return f"{self.player} – {self.match_id} – {self.final_score}pts"
+
+    # ──────────────────────────────────────────────────────────────
+    # SCORING ENGINE – used by both signal & leaderboard queries
+    # ──────────────────────────────────────────────────────────────
+    @property
+    def calculated_points(self) -> int:
+        """
+        Dynamic points calculation – used for:
+        • Real-time leaderboard (today/week/month)
+        • Total points accumulation in UserProfile
+        """
+        if self.status != self.Status.COMPLETED:
+            return 0
+
+        points = 100  # base
+
+        # 1. ACCURACY BONUS (max +40)
+        acc = self.accuracy_percentage or 0
+        if acc >= 95:
+            points += 40
+        elif acc >= 85:
+            points += 35
+        elif acc >= 75:
+            points += 30
+        elif acc >= 65:
+            points += 25
+        elif acc >= 50:
+            points += 20
+        elif acc >= 25:
+            points += 10
+
+        # 2. HINTS PENALTY (max -20)
+        hints = self.hints_used or 0
+        if hints >= 5:
+            points -= 20
+        elif hints >= 3:
+            points -= 15
+        elif hints == 2:
+            points -= 10
+        elif hints == 1:
+            points -= 5
+
+        # 3. TIME BONUS (timed mode only, max +30)
+        if self.game_mode == self.GameMode.TIMED and self.completion_time:
+            gold = self.grid_size * 30    # 4×4 → 120s, 5×5 → 150s, etc.
+            silver = self.grid_size * 45
+            bronze = self.grid_size * 60
+
+            t = self.completion_time
+            if t <= gold:
+                points += 30
+            elif t <= silver:
+                points += 15
+            elif t <= bronze:
+                points += 5
+
+        # 4. MULTIPLAYER POSITION BONUS (max +30)
+        if self.game_type == self.GameType.MULTIPLAYER and self.position:
+            if self.position == 1:
+                points += 30
+            elif self.position == 2:
+                points += 20
+            elif self.position == 3:
+                points += 10
+
+        return max(10, points)  # never below 10
+
+
+# ──────────────────────────────────────────────────────────────
+# AUTO-AWARD POINTS TO USER PROFILE
+# ──────────────────────────────────────────────────────────────
+@receiver(post_save, sender=GameHistory)
+def award_game_points(sender, instance, created, **kwargs):
+    """
+    On every new COMPLETED game:
+    → Add calculated_points to UserProfile.total_game_points
+    → Atomic update (no race conditions)
+    """
+    if not created or instance.status != sender.Status.COMPLETED:
+        return
+
+    points = instance.calculated_points
+
+    with transaction.atomic():
+        from src.services.user.models import UserProfile  # adjust path
+        UserProfile.objects.filter(user=instance.player).update(
+            total_game_points=F("total_game_points") + points
+        )
