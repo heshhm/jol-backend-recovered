@@ -53,39 +53,22 @@ class GameHistoryListView(APIView):
         serializer = GameHistorySerializer(queryset, many=True)
         return Response(serializer.data)
 
-
 class LeaderboardView(APIView):
-    """
-    GET /api/v1/leaderboard/
-    ?period=today | this_week | this_month | all_time
-    ?page=1&page_size=50
-    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         period = request.query_params.get("period", "all_time")
-
-        # Validate period
         valid_periods = ["today", "this_week", "this_month", "all_time"]
         if period not in valid_periods:
             return Response(
-                {"error": f"Invalid period. Must be one of {valid_periods}"},
+                {"error": f"Invalid period. Use: {valid_periods}"},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Validate and constrain pagination parameters
-        try:
-            page_size = min(int(request.query_params.get("page_size", 50)), 100)
-            page = max(int(request.query_params.get("page", 1)), 1)
-        except ValueError:
-            return Response(
-                {"error": "page_size and page must be valid integers"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
+        page_size = min(int(request.query_params.get("page_size", 50)), 100)
+        page = max(int(request.query_params.get("page", 1)), 1)
         offset = (page - 1) * page_size
 
-        # Define time filters
         now = timezone.now()
         start_date = {
             "today": now.replace(hour=0, minute=0, second=0, microsecond=0),
@@ -94,54 +77,41 @@ class LeaderboardView(APIView):
             "all_time": None,
         }.get(period)
 
-        # Base queryset: only completed games
-        games_qs = GameHistory.objects.filter(
+        qs = GameHistory.objects.filter(
             status=GameHistory.Status.COMPLETED
         )
-
         if start_date:
-            games_qs = games_qs.filter(timestamp__gte=start_date)
+            qs = qs.filter(timestamp__gte=start_date)
 
-        # Aggregate points per user in the period
-        # FIXED: Remove -timestamp from order_by (it breaks aggregation since timestamp is not in group_by)
         leaderboard_data = (
-            games_qs
+            qs
             .values("player")
             .annotate(
-                period_points=Sum(
-                    Case(
-                        When(_calculated_points__gt=0, then=F("_calculated_points")),
-                        default=0,
-                        output_field=IntegerField()
-                    )
-                ),
+                period_points=Sum("points_earned"),  # ← NOW A REAL FIELD
                 games_played=Count("id")
             )
-            .order_by("-period_points")  # Only order by aggregated field
+            .order_by("-period_points")
         )
 
-        # Apply pagination
         total = leaderboard_data.count()
         paginated = leaderboard_data[offset:offset + page_size]
 
-        # Enrich with user profile data
         user_ids = [item["player"] for item in paginated]
         profiles = UserProfile.objects.filter(user_id__in=user_ids).select_related("user")
         profile_map = {p.user_id: p for p in profiles}
 
         results = []
-        rank_start = offset + 1
         for idx, item in enumerate(paginated):
             profile = profile_map.get(item["player"])
             if not profile:
                 continue
             results.append({
-                "rank": rank_start + idx,
+                "rank": offset + idx + 1,
                 "user_id": item["player"],
                 "username": profile.user.username,
                 "email": profile.user.email,
                 "avatar": profile.avatar.url if profile.avatar else None,
-                "total_points": item["period_points"],
+                "total_points": item["period_points"] or 0,
                 "games_played": item["games_played"],
             })
 
@@ -152,4 +122,3 @@ class LeaderboardView(APIView):
             "page_size": page_size,
             "results": results
         })
-

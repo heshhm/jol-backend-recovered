@@ -56,6 +56,13 @@ class GameHistory(models.Model):
     )
     hints_used = models.PositiveSmallIntegerField(default=0)
 
+    # GAME POINTS
+    points_earned = models.PositiveIntegerField(
+        default=0,
+        db_index=True,
+        help_text="Points calculated from accuracy, hints, time, position"
+    )
+
     # Conditional / multiplayer-only
     completion_time = models.PositiveIntegerField(
         null=True,

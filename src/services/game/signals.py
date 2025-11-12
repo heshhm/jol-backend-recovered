@@ -16,11 +16,14 @@ def award_game_points(sender, instance, created, **kwargs):
     if not created or instance.status != sender.Status.COMPLETED:
         return
 
-    points = instance.calculated_points
+    points = instance.calculated_points  # your existing method
 
+    # Update the row itself
+    GameHistory.objects.filter(pk=instance.pk).select_for_update().update(points_earned=points)
+
+    # Update UserProfile total
     with transaction.atomic():
         from src.services.user.models import UserProfile
-        # FIXED: Use select_for_update() to lock the row during update
         UserProfile.objects.filter(user=instance.player).select_for_update().update(
             total_game_points=F("total_game_points") + points
         )

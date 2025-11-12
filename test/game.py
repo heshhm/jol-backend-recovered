@@ -58,12 +58,12 @@ def add_game(token, payload_override=None):
 
 def list_games(token, page_size=20, page=1):
     """
-    GET /api/v1/game/games/
+    GET /api/v1/game/list/
     Returns paginated personal game history (newest first)
     """
     headers = {"Authorization": f"Token {token}"}
     params = {"page_size": page_size, "page": page}
-    res = requests.get(f"{BASE_URL}/v1/game/games/", headers=headers, params=params)
+    res = requests.get(f"{BASE_URL}/v1/game/list/", headers=headers, params=params)
     pretty_print("LIST GAMES", res)
     return res
 
