@@ -165,25 +165,3 @@ class GameHistory(models.Model):
                 points += 10
 
         return max(10, points)  # never below 10
-
-
-# ──────────────────────────────────────────────────────────────
-# AUTO-AWARD POINTS TO USER PROFILE
-# ──────────────────────────────────────────────────────────────
-@receiver(post_save, sender=GameHistory)
-def award_game_points(sender, instance, created, **kwargs):
-    """
-    On every new COMPLETED game:
-    → Add calculated_points to UserProfile.total_game_points
-    → Atomic update (no race conditions)
-    """
-    if not created or instance.status != sender.Status.COMPLETED:
-        return
-
-    points = instance.calculated_points
-
-    with transaction.atomic():
-        from src.services.user.models import UserProfile  # adjust path
-        UserProfile.objects.filter(user=instance.player).update(
-            total_game_points=F("total_game_points") + points
-        )
