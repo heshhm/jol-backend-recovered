@@ -82,6 +82,7 @@ INSTALLED_APPS = [
 
     # Local apps
     "src.services.user",
+    "src.services.game",
 ]
 
 MIDDLEWARE = [
