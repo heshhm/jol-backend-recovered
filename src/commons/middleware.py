@@ -18,10 +18,12 @@ class ExceptionLoggingMiddleware(MiddlewareMixin):
     - Works with DRF, allauth, plain Django views
     """
 
+    # noinspection PyMethodMayBeStatic
     def process_request(self, request):
         # Store start time for duration measurement
         request._error_middleware_start = time.time()
 
+    # noinspection PyMethodMayBeStatic
     def process_exception(self, request, exception):
         """
         Called when a view raises an exception.
@@ -31,6 +33,7 @@ class ExceptionLoggingMiddleware(MiddlewareMixin):
         request._error_exception = exception
         return None  # let Django continue
 
+    # noinspection PyMethodMayBeStatic
     def process_response(self, request, response):
         start = getattr(request, "_error_middleware_start", None)
         duration = (time.time() - start) if start else 0.0
