@@ -13,7 +13,3 @@ def create_user_profile(sender, instance, created, **kwargs):
 def create_user_wallet(sender, instance, created, **kwargs):
     if created:
         UserWallet.objects.create(user=instance)
-
-@receiver(post_save, sender=UserProfile)
-def save_user_profile(sender, instance, **kwargs):
-    instance.user.save()
