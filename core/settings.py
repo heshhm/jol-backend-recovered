@@ -94,6 +94,9 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
+
+    # CUSTOM MIDDLEWARE
+    'src.commons.middleware.ExceptionLoggingMiddleware',
 ]
 
 TEMPLATES = [
@@ -181,3 +184,9 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticated",
     ],
 }
+
+# SERVER ADMINS FOR AUTOMATED ERROR EMAILS
+ADMINS = [
+    ('Hesham', 'iamhuman0078@gmail.com'),
+    ('Mueen', 'mueenaly.official@gmail.com')
+]
