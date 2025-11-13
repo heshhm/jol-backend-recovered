@@ -54,5 +54,4 @@ migrations/
 
 
 # TEMP
-/django-analytics
-
+/django_analytics

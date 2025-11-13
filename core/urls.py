@@ -14,6 +14,7 @@ urlpatterns = [
     path('api/', include('src.api.urls')),
 
     path('accounts/', include('allauth.urls')),
+    path("", include("django_analytics.urls")),
 ]
 
 urlpatterns += [

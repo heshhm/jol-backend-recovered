@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "dj_rest_auth",
     "dj_rest_auth.registration",
+
     # O AUTH Providers
     'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.apple',
@@ -83,6 +84,10 @@ INSTALLED_APPS = [
     # Local apps
     "src.services.user",
     "src.services.game",
+
+    # TODO: REMOVE DJ_ANALYTICS
+    'django_analytics'
+
 ]
 
 MIDDLEWARE = [
@@ -90,8 +95,10 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
 
     # CUSTOM MIDDLEWARE
-    'src.commons.middleware.ExceptionLoggingMiddleware',
+    "src.commons.middleware.ExceptionLoggingMiddleware",
+    "django_analytics.middleware.AnalyticsMiddleware",
 
+    # TODO: REMOVE DJ_ANALYTIC
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",

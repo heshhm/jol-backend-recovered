@@ -10,13 +10,12 @@ def call_error_test_api():
         "Authorization": f"Token {login_user('admin@admin.com', 'admin')}"
     }
     response = requests.get(url, headers=headers)
-    print("Error Test API Response:", response.status_code, response.text)
     return response
 
 
 
 def main():
-    res = call_error_test_api()
+    call_error_test_api()
 
 
 if __name__ == "__main__":

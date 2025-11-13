@@ -7,8 +7,7 @@ from .views import (
     ProcessReferralAPIView, ErrorTestAPIView,
 )
 
-
-
+app_name = 'user'
 urlpatterns = [
     path( 'detail/', UserRetrieveUpdateAPIView.as_view(), name='user_retrieve_update'),
     path( 'profile/', UserProfileRetrieveUpdateAPIView.as_view(), name='user_profile_retrieve_update'),

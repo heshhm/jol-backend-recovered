@@ -11,7 +11,7 @@ from src.api.v1.user.serializers import (
     CoinSerializer, UserSerializer, UserProfileSerializer, UserProfileUpdateSerializer, UserWalletSerializer
 )
 
-# [heshhm] move this to commons model for easier access post launch
+# TODO: [heshhm] move this to commons model for easier access post launch
 CODE_OWNER_BONUS = 100   # CODE OWNER
 NEW_USER_BONUS = 50  # NEW USER
 REFERRALS_LIMIT = 7
