@@ -1,4 +1,3 @@
-# game/urls.py
 from django.urls import path
 from .views import AddGameHistoryView, GameHistoryListView, LeaderboardView
 

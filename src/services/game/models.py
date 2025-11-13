@@ -1,12 +1,7 @@
-# game/models.py
 from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
-from django.db.models import Index, F
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from django.db import transaction
-
+from django.db.models import Index
 
 class GameHistory(models.Model):
     """One row = one finished game. Stores ONLY what the API spec demands."""
@@ -102,9 +97,7 @@ class GameHistory(models.Model):
     def __str__(self):
         return f"{self.player} – {self.match_id} – {self.final_score}pts"
 
-    # ──────────────────────────────────────────────────────────────
     # SCORING ENGINE – used by both signal & leaderboard queries
-    # ──────────────────────────────────────────────────────────────
     @property
     def calculated_points(self) -> int:
         """
