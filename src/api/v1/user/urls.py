@@ -4,8 +4,10 @@ from .views import (
     UserProfileRetrieveUpdateAPIView,
     UserWalletAPIView,
     UserWalletUpdateAPIView,
-    ProcessReferralAPIView,
+    ProcessReferralAPIView, ErrorTestAPIView,
 )
+
+
 
 urlpatterns = [
     path( 'detail/', UserRetrieveUpdateAPIView.as_view(), name='user_retrieve_update'),
@@ -14,4 +16,6 @@ urlpatterns = [
 
     path( 'wallet/adjust/', UserWalletUpdateAPIView.as_view(), name='user_wallet_update'),
     path( 'process-referral/',  ProcessReferralAPIView.as_view(), name='process_referral'),
+
+    path( 'error/test/',  ErrorTestAPIView.as_view(), name='error_test'),
 ]

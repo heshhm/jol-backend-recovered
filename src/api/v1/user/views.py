@@ -88,6 +88,7 @@ class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
     def get_object(self):
         return self.request.user
 
+
 class ProcessReferralAPIView(APIView):
     """
     Processes a referral code after user onboarding.
@@ -137,3 +138,14 @@ class ProcessReferralAPIView(APIView):
 
         new_user_profile.save()
         return Response({"message": "Referral processed successfully"})
+
+
+class ErrorTestAPIView(APIView):
+    """
+    An endpoint to deliberately raise an exception for testing error logging.
+    GET /v1/error/test/
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        raise Exception("Deliberate exception for testing error logging middleware.")

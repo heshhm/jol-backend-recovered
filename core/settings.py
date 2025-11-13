@@ -88,6 +88,10 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+
+    # CUSTOM MIDDLEWARE
+    'src.commons.middleware.ExceptionLoggingMiddleware',
+
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -95,8 +99,6 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
 
-    # CUSTOM MIDDLEWARE
-    'src.commons.middleware.ExceptionLoggingMiddleware',
 ]
 
 TEMPLATES = [
@@ -190,3 +192,4 @@ ADMINS = [
     ('Hesham', 'iamhuman0078@gmail.com'),
     ('Mueen', 'mueenaly.official@gmail.com')
 ]
+SERVER_EMAIL = env("DEFAULT_FROM_EMAIL")
