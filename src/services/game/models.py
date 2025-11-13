@@ -160,3 +160,8 @@ class GameHistory(models.Model):
                 points += 10
 
         return max(10, points)  # never below 10
+
+    def save(self, *args, **kwargs):
+
+        self.points_earned = self.calculated_points
+        super().save(*args, **kwargs)

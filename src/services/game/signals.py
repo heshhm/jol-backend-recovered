@@ -18,9 +18,6 @@ def award_game_points(sender, instance, created, **kwargs):
 
     points = instance.calculated_points  # your existing method
 
-    # Update the row itself
-    GameHistory.objects.filter(pk=instance.pk).select_for_update().update(points_earned=points)
-
     # Update UserProfile total
     with transaction.atomic():
         from src.services.user.models import UserProfile

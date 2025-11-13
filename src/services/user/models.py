@@ -31,9 +31,14 @@ class UserProfile(models.Model):
     bio = models.TextField(blank=True, null=True)
     location = models.CharField(max_length=255, blank=True, null=True)
     birth_date = models.DateField(blank=True, null=True)
+    avatar = ResizedImageField(
+        size=[300, 300], crop=['middle', 'center'], quality=85,
+        force_format="JPEG", upload_to=user_avatar_path,
+        null=True, blank=True
+    )
 
 
-    # REFFERALS
+    # REFERRALS
     referral_code = models.CharField(max_length=8, unique=True, blank=True)
     referred_by = models.ForeignKey(
         'self', null=True, blank=True, on_delete=models.SET_NULL,
@@ -47,11 +52,14 @@ class UserProfile(models.Model):
         db_index=True,
         help_text="Total points earned from completed games"
     )
-    avatar = ResizedImageField(
-        size=[300, 300], crop=['middle', 'center'], quality=85,
-        force_format="JPEG", upload_to=user_avatar_path,
-        null=True, blank=True
+    used_game_points = models.PositiveBigIntegerField(
+        default=0,
+        help_text="Points redeemed for rewards"
     )
+
+    @property
+    def available_game_points(self):
+        return self.total_game_points - self.used_game_points
 
     def save(self, *args, **kwargs):
         if not self.referral_code:

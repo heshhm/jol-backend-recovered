@@ -111,6 +111,9 @@ def main():
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     header = [
         f"# Folder Structure Log",
+        f"# Created by: rootreader.py",
+        f"# User --skip to ignore directories",
+        f"# Usage: python rootreader.py . --skip .venv .git .idea __pycache__"
         f"Scanned: {os.path.abspath(root)}",
         f"Date:    {timestamp}",
         f"Python:  {sys.version.split()[0]}",
