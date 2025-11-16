@@ -34,15 +34,17 @@ class UserProfileSerializer(serializers.ModelSerializer):
     """
     Serializes the full user profile data for read operations.
     Includes bio, location, birth_date, avatar, referral code,
-    referred_by, and total_referrals.
+    referred_by, total_referrals and a read-only available_game_points
+    field which clients can use to show how many game points are
+    available for redemption.
     """
     class Meta:
         model = UserProfile
         fields = [
             'bio', 'location', 'birth_date', 'avatar',
-            'referral_code', 'referred_by', 'total_referrals'
+            'referral_code', 'referred_by', 'total_referrals', 'available_game_points'
         ]
-        read_only_fields = ['referral_code', 'total_referrals']
+        read_only_fields = ['referral_code', 'total_referrals', 'available_game_points']
 
 
 class UserProfileUpdateSerializer(serializers.ModelSerializer):
@@ -58,7 +60,7 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     """
     Serializes user account data for API responses.
-    Includes first_name, last_name, email, username, wallet summary, and nested profile.
+    Includes primary key, email, username, first_name and last_name.
     'pk' and 'email' are read-only.
     """
 

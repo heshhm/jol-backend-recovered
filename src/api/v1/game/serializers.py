@@ -67,7 +67,8 @@ class GameHistorySerializer(serializers.ModelSerializer):
             "game_type", "game_mode", "operation",
             "grid_size", "timestamp", "status",
             "final_score", "accuracy_percentage", "hints_used",
-            "completion_time", "room_code", "position", "total_players"
+            "completion_time", "room_code", "position", "total_players",
+            "points_earned",
         ]
         read_only_fields = fields
 
