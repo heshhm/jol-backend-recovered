@@ -10,11 +10,15 @@ from src.services.user.models import UserProfile
 from src.api.v1.user.serializers import (
     CoinSerializer, UserSerializer, UserProfileSerializer, UserProfileUpdateSerializer, UserWalletSerializer
 )
+from src.api.v1.user.serializers import RedeemSerializer
 
 # TODO: [heshhm] move this to commons model for easier access post launch
 CODE_OWNER_BONUS = 100   # CODE OWNER
 NEW_USER_BONUS = 50  # NEW USER
 REFERRALS_LIMIT = 7
+# Number of game points required to produce 1 coin
+# e.g. COIN_VALUE = 100 means 100 points -> 1 coin
+COIN_VALUE = 1000
 
 class UserWalletAPIView(APIView):
     """
@@ -149,3 +153,57 @@ class ErrorTestAPIView(APIView):
 
     def get(self, request):
         raise Exception("Deliberate exception for testing error logging middleware.")
+
+
+class RedeemPointsAPIView(APIView):
+    """
+    Redeem game points into coins.
+
+    POST /v1/wallet/redeem/
+    Body: { "coins": <int> }
+
+    Validation & behavior:
+    - Verifies user has enough available_game_points to cover coins * COIN_VALUE
+    - Atomically increments wallet.total_coins and increments profile.used_game_points
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        serializer = RedeemSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        coins = serializer.validated_data['coins']
+
+        points_required = coins * COIN_VALUE
+
+        from src.services.user.models import UserProfile, UserWallet
+        from django.db import transaction
+        from django.db.models import F
+
+        # Ensure wallet exists (get_or_create) before locking
+        request.user.get_wallet()
+
+        with transaction.atomic():
+            profile = UserProfile.objects.select_for_update().get(user=request.user)
+            wallet = UserWallet.objects.select_for_update().get(user=request.user)
+
+            available = profile.total_game_points - profile.used_game_points
+            if available < points_required:
+                return Response({"error": "Insufficient game points"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Apply updates atomically using F expressions
+            UserProfile.objects.filter(user=request.user).update(
+                used_game_points=F('used_game_points') + points_required
+            )
+            UserWallet.objects.filter(user=request.user).update(
+                total_coins=F('total_coins') + coins
+            )
+
+            # Refresh instances for response
+            profile.refresh_from_db()
+            wallet.refresh_from_db()
+
+        return Response({
+            "coins_awarded": coins,
+            "available_game_points": profile.total_game_points - profile.used_game_points,
+            "available_coins": wallet.total_coins - wallet.used_coins,
+        })

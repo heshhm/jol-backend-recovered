@@ -11,6 +11,14 @@ class CoinSerializer(serializers.Serializer):
     type = serializers.ChoiceField(choices=['increment', 'decrement'], required=True)
 
 
+class RedeemSerializer(serializers.Serializer):
+    """
+    Serializer for redeeming game points into coins.
+    Request body: { "coins": <int> }
+    """
+    coins = serializers.IntegerField(min_value=1, required=True)
+
+
 class UserWalletSerializer(serializers.ModelSerializer):
     """
     Serializes user wallet data for API responses.
