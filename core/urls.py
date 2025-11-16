@@ -14,6 +14,9 @@ urlpatterns = [
     path('api/', include('src.api.urls')),
 
     path('accounts/', include('allauth.urls')),
+
+
+    # TODO REMOVE DJ_ANALYTICS
     path("", include("django_analytics.urls")),
 ]
 

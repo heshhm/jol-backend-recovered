@@ -95,8 +95,7 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
 
     # CUSTOM MIDDLEWARE
-    "src.commons.middleware.ExceptionLoggingMiddleware",
-    "django_analytics.middleware.AnalyticsMiddleware",
+    'django_analytics.middleware.AnalyticsMiddleware',
 
     # TODO: REMOVE DJ_ANALYTIC
     "django.middleware.common.CommonMiddleware",
