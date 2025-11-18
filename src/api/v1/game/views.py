@@ -75,9 +75,8 @@ class LeaderboardView(APIView):
             "all_time": None,
         }.get(period)
 
-        qs = GameHistory.objects.filter(
-            status=GameHistory.Status.COMPLETED
-        )
+        qs = GameHistory.objects.all()
+
         if start_date:
             qs = qs.filter(timestamp__gte=start_date)
 

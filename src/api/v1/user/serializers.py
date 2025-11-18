@@ -27,7 +27,8 @@ class UserWalletSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = UserWallet
-        fields = ['total_coins', 'used_coins', 'available_coins']
+        fields = ['available_coins']
+        # fields = ['total_coins', 'used_coins', 'available_coins']
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
