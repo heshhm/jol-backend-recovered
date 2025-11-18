@@ -33,6 +33,7 @@ class UserWalletAPIView(APIView):
         serializer = UserWalletSerializer(wallet)
         return Response(serializer.data)
 
+
 class UserWalletUpdateAPIView(APIView):
     """
     Updates the authenticated user's wallet by incrementing or decrementing coins.
