@@ -30,10 +30,8 @@ class AddGameHistoryView(APIView):
         )
         if serializer.is_valid():
             game = serializer.save()
-            return Response(
-                {"detail": "Game saved.", "match_id": str(game.match_id)},
-                status=status.HTTP_201_CREATED
-            )
+            out_ser = GameHistorySerializer(game)
+            return Response(out_ser.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class GameHistoryListView(APIView):

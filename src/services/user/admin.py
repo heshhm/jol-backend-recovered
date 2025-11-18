@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, UserProfile, UserWallet
+from .models import User, UserProfile, UserWallet, PendingReferral
 
 class UserAdmin(admin.ModelAdmin):
     list_display = ('id', 'username', 'email', 'first_name', 'last_name', 'is_active', 'is_staff', 'is_superuser', 'created_at', 'updated_at')
@@ -29,3 +29,4 @@ class UserWalletAdmin(admin.ModelAdmin):
 admin.site.register(User, UserAdmin)
 admin.site.register(UserProfile, UserProfileAdmin)
 admin.site.register(UserWallet, UserWalletAdmin)
+admin.site.register(PendingReferral)

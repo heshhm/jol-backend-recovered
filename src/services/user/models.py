@@ -61,6 +61,15 @@ class UserProfile(models.Model):
     def available_game_points(self):
         return self.total_game_points - self.used_game_points
 
+    @property
+    def referral_link(self):
+        """
+        Returns the full shareable referral link using query parameter style.
+        Example: https://yourdomain.com/download?refcode=ABC123
+        """
+        from django.conf import settings
+        code = self.referral_code or ''
+        return f"{settings.BASE_URL}/download?refcode={code}"
     def save(self, *args, **kwargs):
         if not self.referral_code:
             self.referral_code = self.generate_referral_code()
@@ -117,3 +126,41 @@ class UserWallet(models.Model):
 
     def __str__(self):
         return f"{self.user} – {self.available_coins} coins"
+
+
+class PendingReferral(models.Model):
+    """
+    Tracks a potential referral when a visitor clicks a shared referral link.
+    Created when a visitor clicks a download button and includes the referral code
+    and the visitor's public IP address. Later matched at signup time.
+    """
+    referral_code = models.CharField(max_length=50, db_index=True)
+    ip_address = models.GenericIPAddressField(db_index=True, help_text="IPv4 or IPv6 address")
+    clicked_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    # Redemption tracking
+    redeemed_at = models.DateTimeField(null=True, blank=True)
+    redeemed_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='redeemed_referrals',
+        help_text="User who signed up using this referral"
+    )
+
+    class Meta:
+        verbose_name = "Pending Referral"
+        verbose_name_plural = "Pending Referrals"
+        indexes = [
+            models.Index(fields=['ip_address', 'redeemed_at']),
+            models.Index(fields=['referral_code', 'clicked_at']),
+        ]
+        ordering = ['-clicked_at']
+
+    def __str__(self):
+        status = "Redeemed" if self.redeemed_at else "Pending"
+        return f"{self.referral_code} - {self.ip_address} ({status})"
+
+    def is_redeemed(self):
+        return self.redeemed_at is not None

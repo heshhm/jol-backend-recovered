@@ -1,3 +1,60 @@
 from django.shortcuts import render
+from django.views import View
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 
-# Create your views here.
+from src.services.user.models import UserProfile, PendingReferral
+from src.commons.utils import get_client_ip
+
+
+class DownloadPageView(View):
+	"""
+	Simple download landing page.
+
+	GET /download/?refcode=ABC123  - shows the download page and referrer info (if present)
+	POST /download/ - records a click (body must include 'refcode') and stores IP+refcode
+	"""
+
+	def get(self, request):
+		refcode = request.GET.get('refcode') or None
+		context = {
+			'referral_code': refcode,
+			'google_play_url': 'https://play.google.com/store/apps/details?id=com.yourapp',
+			'app_store_url': 'https://apps.apple.com/app/idYOURAPPID',
+		}
+
+		if refcode:
+			try:
+				profile = UserProfile.objects.get(referral_code=refcode.upper())
+				context['referrer_username'] = profile.user.username
+				context['valid_code'] = True
+			except UserProfile.DoesNotExist:
+				context['valid_code'] = False
+
+		return render(request, 'download.html', context)
+
+	@method_decorator(csrf_exempt)
+	def post(self, request):
+		# Expect JSON body with { "refcode": "ABC123", "store": "google_play" }
+		try:
+			import json
+			body = json.loads(request.body.decode() or '{}')
+		except Exception:
+			body = {}
+
+		refcode = (body.get('refcode') or request.GET.get('refcode'))
+		if not refcode:
+			return JsonResponse({'success': False, 'error': 'missing refcode'}, status=400)
+
+		client_ip = get_client_ip(request)
+		if not client_ip:
+			return JsonResponse({'success': False, 'error': 'could not determine ip'}, status=400)
+
+		# Avoid duplicate unredeemed entries for same ip+code
+		existing = PendingReferral.objects.filter(referral_code=refcode.upper(), ip_address=client_ip, redeemed_at__isnull=True).first()
+		if existing:
+			return JsonResponse({'success': True, 'tracked': False, 'already_exists': True})
+
+		PendingReferral.objects.create(referral_code=refcode.upper(), ip_address=client_ip)
+		return JsonResponse({'success': True, 'tracked': True})

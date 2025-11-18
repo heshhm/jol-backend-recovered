@@ -42,9 +42,9 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = UserProfile
         fields = [
             'bio', 'location', 'birth_date', 'avatar',
-            'referral_code', 'referred_by', 'total_referrals', 'available_game_points'
+            'referral_code', 'referral_link', 'referred_by', 'total_referrals', 'available_game_points'
         ]
-        read_only_fields = ['referral_code', 'total_referrals', 'available_game_points']
+        read_only_fields = ['referral_code', 'referral_link', 'total_referrals', 'available_game_points']
 
 
 class UserProfileUpdateSerializer(serializers.ModelSerializer):

@@ -1,4 +1,5 @@
 from src.commons.handlers import handler404, handler500
+from src.commons.views import DownloadPageView
 from core.settings import MEDIA_ROOT, STATIC_ROOT
 
 from django.contrib import admin
@@ -15,6 +16,8 @@ urlpatterns = [
 
     path('accounts/', include('allauth.urls')),
 
+    # Referral download page (referral_code is optional)
+    path('download/', DownloadPageView.as_view(), name='download'),
 
     # TODO REMOVE DJ_ANALYTICS
     path("", include("django_analytics.urls")),

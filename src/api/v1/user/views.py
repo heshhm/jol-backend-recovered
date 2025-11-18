@@ -104,14 +104,46 @@ class ProcessReferralAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
-        raw_code = request.data.get("referral_code", "").strip().upper()
+        """
+        Prefer IP-based attribution. Flow:
+        - If user already has referred_by, do nothing.
+        - Try to find an unredeemed PendingReferral by the request IP.
+        - If found, use its referral_code; otherwise, fall back to explicit referral_code in body.
+        - Prevent self-referral and duplicate processing.
+        - Atomically mark PendingReferral redeemed, increment referrer's total_referrals and coins,
+          and credit new user if applicable.
+        """
+        from src.commons.utils import get_client_ip
+        from src.services.user.models import PendingReferral
+        from django.utils import timezone
+
+        new_user_profile = request.user.profile
+        # If already referred, nothing to do
+        if new_user_profile.referred_by:
+            return Response({"message": "Referral processed successfully"})
+
+        # Try IP-based lookup first
+        client_ip = get_client_ip(request)
+        pending = None
+        if client_ip:
+            pending = PendingReferral.objects.filter(
+                ip_address=client_ip,
+                redeemed_at__isnull=True
+            ).order_by('-clicked_at').first()
+
+        raw_code = None
+        if pending:
+            raw_code = pending.referral_code
+            attributed_via = 'ip'
+        else:
+            raw_code = request.data.get('referral_code', '').strip().upper()
+            attributed_via = 'code' if raw_code else None
+
         if not raw_code:
             return Response({"message": "Referral processed successfully"})
 
-        # CHECK IF USER HAS ALREADY BEEN REFERRED OR IS USING THEIR OWN CODE
-        # NIGGAS BE TRYNA CHEAT
-        new_user_profile = request.user.profile
-        if new_user_profile.referred_by or raw_code == new_user_profile.referral_code:
+        # Prevent self-referral
+        if raw_code == new_user_profile.referral_code:
             return Response({"message": "Referral processed successfully"})
 
         try:
@@ -119,30 +151,37 @@ class ProcessReferralAPIView(APIView):
         except UserProfile.DoesNotExist:
             return Response({"message": "Referral processed successfully"})
 
-        # ALWAYS NO CHECKS
-        new_user_profile.referred_by = code_owner
-
+        # Atomic update: credit referrer (if under limit) and mark pending as redeemed
         code_owner_rewarded = False
         with transaction.atomic():
-            # LOCK THE CODE OWNER & GIVE BONUS IF < LIMIT & SET REWARDED TO TRUE
             code_owner_locked = UserProfile.objects.select_for_update().get(id=code_owner.id)
+            # Give referrer bonus if still under limit
             if code_owner_locked.total_referrals < REFERRALS_LIMIT:
                 updated = UserProfile.objects.filter(
                     id=code_owner.id, total_referrals__lt=REFERRALS_LIMIT
                 ).update(total_referrals=F('total_referrals') + 1)
 
-                # THE > 0 CHECK IS BECAUSE THERE IS MOAL LEVEL VALIDATION FOR COIN
-                # INCREMENTS THAT CANT BE 0 MUST BE POSITIVE INTEGERS
                 if updated and CODE_OWNER_BONUS > 0:
                     code_owner_locked.user.get_wallet().increment_coins(CODE_OWNER_BONUS)
                     code_owner_rewarded = True
 
-        # GIVE BONUS TO THE NEW USER IF THE REFERRER WAS REWARDED
-        if code_owner_rewarded and NEW_USER_BONUS > 0:
-            new_user_profile.user.get_wallet().increment_coins(NEW_USER_BONUS)
+            # Set referred_by on new user's profile
+            # lock new_user_profile row to avoid races
+            new_profile_locked = UserProfile.objects.select_for_update().get(id=new_user_profile.id)
+            new_profile_locked.referred_by = code_owner_locked
+            new_profile_locked.save()
 
-        new_user_profile.save()
-        return Response({"message": "Referral processed successfully"})
+            # If we matched via pending referral, mark it redeemed
+            if pending:
+                pending.redeemed_at = timezone.now()
+                pending.redeemed_by = request.user
+                pending.save()
+
+        # Give bonus to new user only if referrer was rewarded
+        if code_owner_rewarded and NEW_USER_BONUS > 0:
+            request.user.get_wallet().increment_coins(NEW_USER_BONUS)
+
+        return Response({"message": "Referral processed successfully", "attributed_via": attributed_via})
 
 
 class ErrorTestAPIView(APIView):
