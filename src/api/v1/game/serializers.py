@@ -59,14 +59,18 @@ class GameHistoryCreateSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 class GameHistorySerializer(serializers.ModelSerializer):
-    """Exact fields from the PDF – nothing more."""
+    # The source='points_earned' argument successfully tells DRF:
+    # "When populating final_score, look at the points_earned column in the database."
+
+    final_score = serializers.IntegerField(source='points_earned', read_only=True)
     class Meta:
         model = GameHistory
         fields = [
             "match_id",
             "game_type", "game_mode", "operation",
             "grid_size", "timestamp", "status",
-            "final_score", "accuracy_percentage", "hints_used",
+            "final_score",
+            "accuracy_percentage", "hints_used",
             "completion_time", "room_code", "position", "total_players",
             "points_earned",
         ]

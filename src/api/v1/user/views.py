@@ -18,7 +18,7 @@ NEW_USER_BONUS = 50  # NEW USER
 REFERRALS_LIMIT = 7
 # Number of game points required to produce 1 coin
 # e.g. COIN_VALUE = 100 means 100 points -> 1 coin
-COIN_VALUE = 1000
+COIN_VALUE = 100
 
 class UserWalletAPIView(APIView):
     """

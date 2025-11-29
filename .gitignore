@@ -55,3 +55,5 @@ migrations/
 
 # TEMP
 /django_analytics
+.trunk
+
