@@ -1,0 +1,193 @@
+<!-- django_analytics/partials/user_detail.html -->
+<div class="space-y-6">
+
+    <!-- Back Button + Header -->
+    <div class="flex items-center gap-4 mb-2">
+        <a href="{{ content_url }}?tab=users" 
+           hx-get="{{ content_url }}?tab=users"
+           hx-target="#tab-content"
+           hx-push-url="{{ content_url }}?tab=users"
+           class="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors">
+            <i class="fas fa-arrow-left"></i>
+            <span class="text-sm font-medium">Back to Users</span>
+        </a>
+    </div>
+
+    <!-- Info Banner -->
+    <div class="bg-slate-900 border border-slate-700 rounded-xl p-6">
+        <div class="flex items-start gap-6">
+            {% if profile.avatar %}
+            <img src="{{ profile.avatar.url }}" alt="{{ profile.user.username }}" class="w-20 h-20 rounded-full object-cover border-2 border-slate-700">
+            {% else %}
+            <div class="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-2xl border-2 border-slate-700">
+                {{ profile.user.username|slice:":1"|upper }}
+            </div>
+            {% endif %}
+            <div class="flex-1">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-xl font-mono text-white font-bold">{{ profile.user.username }}</h3>
+                    {% if profile.user.is_active %}
+                    <span class="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs font-medium border border-green-500/30">Active</span>
+                    {% else %}
+                    <span class="px-2 py-1 bg-red-500/20 text-red-400 rounded text-xs font-medium border border-red-500/30">Inactive</span>
+                    {% endif %}
+                </div>
+                <p class="text-sm text-gray-400 mb-3">{{ profile.user.email }}</p>
+                <div class="flex items-center gap-4 text-xs text-gray-400">
+                    <span><i class="fas fa-id-card mr-1"></i> ID: {{ profile.id }}</span>
+                    <span><i class="fas fa-calendar mr-1"></i> Joined: {{ profile.user.date_joined|date:"M d, Y" }}</span>
+                    <span><i class="fas fa-code mr-1"></i> Code: <code class="bg-slate-800 px-1.5 py-0.5 rounded text-cyan-400">{{ profile.referral_code }}</code></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="bg-white px-5 py-4 rounded-xl border border-gray-200 hover:border-gray-300 transition-colors">
+            <div class="flex items-center justify-between mb-2">
+                <div class="text-xs font-medium text-gray-500 uppercase tracking-wide">Wallet Balance</div>
+                <i class="fas fa-wallet text-green-500 text-sm"></i>
+            </div>
+            {% if profile.user.wallet %}
+            <div class="text-3xl font-semibold text-gray-900">{{ profile.user.wallet.available_coins }}</div>
+            <div class="text-xs text-gray-500 mt-1">{{ profile.user.wallet.total_coins }} total coins</div>
+            {% else %}
+            <div class="text-3xl font-semibold text-gray-400">—</div>
+            {% endif %}
+        </div>
+        
+        <div class="bg-white px-5 py-4 rounded-xl border border-gray-200 hover:border-gray-300 transition-colors">
+            <div class="flex items-center justify-between mb-2">
+                <div class="text-xs font-medium text-gray-500 uppercase tracking-wide">Games Played</div>
+                <i class="fas fa-gamepad text-blue-500 text-sm"></i>
+            </div>
+            <div class="text-3xl font-semibold text-gray-900">{{ games_played|default:0 }}</div>
+        </div>
+        
+        <div class="bg-white px-5 py-4 rounded-xl border border-gray-200 hover:border-gray-300 transition-colors">
+            <div class="flex items-center justify-between mb-2">
+                <div class="text-xs font-medium text-gray-500 uppercase tracking-wide">Game Points</div>
+                <i class="fas fa-star text-yellow-500 text-sm"></i>
+            </div>
+            <div class="text-3xl font-semibold text-gray-900">{{ profile.total_game_points|default:0 }}</div>
+            <div class="text-xs text-gray-500 mt-1">{{ profile.used_game_points|default:0 }} used</div>
+        </div>
+        
+        <div class="bg-white px-5 py-4 rounded-xl border border-gray-200 hover:border-gray-300 transition-colors">
+            <div class="flex items-center justify-between mb-2">
+                <div class="text-xs font-medium text-gray-500 uppercase tracking-wide">Total Referrals</div>
+                <i class="fas fa-users text-purple-500 text-sm"></i>
+            </div>
+            <div class="text-3xl font-semibold text-purple-600">{{ profile.total_referrals|default:0 }}</div>
+        </div>
+    </div>
+
+    <!-- Profile Details -->
+    <div class="bg-white rounded-xl border border-gray-200 p-6">
+        <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wide mb-4">Profile Information</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-3">
+                {% if profile.bio %}
+                <div>
+                    <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Bio</dt>
+                    <dd class="text-sm text-gray-900">{{ profile.bio }}</dd>
+                </div>
+                {% endif %}
+                {% if profile.location %}
+                <div>
+                    <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Location</dt>
+                    <dd class="text-sm text-gray-900"><i class="fas fa-map-marker-alt text-gray-400 mr-1"></i> {{ profile.location }}</dd>
+                </div>
+                {% endif %}
+                {% if profile.birth_date %}
+                <div>
+                    <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Birth Date</dt>
+                    <dd class="text-sm text-gray-900"><i class="fas fa-birthday-cake text-gray-400 mr-1"></i> {{ profile.birth_date|date:"M d, Y" }}</dd>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Referral Information -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        
+        <!-- Referred By -->
+        <div class="bg-white rounded-xl border border-gray-200 p-5">
+            <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wide mb-4 flex items-center gap-2">
+                <i class="fas fa-user-plus text-blue-500"></i>
+                Referred By
+            </h3>
+            
+            {% if profile.referred_by %}
+            <a href="{% url 'django_analytics:user_detail' profile.referred_by.id %}" 
+               hx-get="{% url 'django_analytics:user_detail' profile.referred_by.id %}"
+               hx-target="#tab-content"
+               hx-push-url="{% url 'django_analytics:user_detail' profile.referred_by.id %}"
+               class="flex items-center gap-3 p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors group">
+                {% if profile.referred_by.avatar %}
+                <img src="{{ profile.referred_by.avatar.url }}" alt="{{ profile.referred_by.user.username }}" class="w-12 h-12 rounded-full object-cover">
+                {% else %}
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold">
+                    {{ profile.referred_by.user.username|slice:":1"|upper }}
+                </div>
+                {% endif %}
+                <div class="flex-1 min-w-0">
+                    <div class="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">{{ profile.referred_by.user.username }}</div>
+                    <div class="text-sm text-gray-600 truncate">{{ profile.referred_by.user.email }}</div>
+                    <div class="text-xs text-gray-500 mt-1">
+                        <code class="bg-white px-1.5 py-0.5 rounded">{{ profile.referred_by.referral_code }}</code>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-right text-gray-400 group-hover:text-blue-600 transition-colors"></i>
+            </a>
+            {% else %}
+            <div class="text-center py-8 text-gray-500">
+                <i class="fas fa-user-slash text-4xl text-gray-300 mb-2"></i>
+                <p class="text-sm">Not referred by anyone</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Users Referred -->
+        <div class="bg-white rounded-xl border border-gray-200 p-5">
+            <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wide mb-4 flex items-center gap-2">
+                <i class="fas fa-users text-green-500"></i>
+                Users Referred <span class="text-green-600">({{ referred_users.count }})</span>
+            </h3>
+            
+            {% if referred_users %}
+            <div class="space-y-2 max-h-80 overflow-y-auto">
+                {% for referred in referred_users %}
+                <a href="{% url 'django_analytics:user_detail' referred.id %}" 
+                   hx-get="{% url 'django_analytics:user_detail' referred.id %}"
+                   hx-target="#tab-content"
+                   hx-push-url="{% url 'django_analytics:user_detail' referred.id %}"
+                   class="flex items-center gap-3 p-3 bg-green-50 rounded-lg hover:bg-green-100 transition-colors group">
+                    {% if referred.avatar %}
+                    <img src="{{ referred.avatar.url }}" alt="{{ referred.user.username }}" class="w-10 h-10 rounded-full object-cover">
+                    {% else %}
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-teal-500 flex items-center justify-center text-white font-bold text-sm">
+                        {{ referred.user.username|slice:":1"|upper }}
+                    </div>
+                    {% endif %}
+                    <div class="flex-1 min-w-0">
+                        <div class="font-medium text-gray-900 truncate group-hover:text-green-600 transition-colors">{{ referred.user.username }}</div>
+                        <div class="text-xs text-gray-500 truncate">{{ referred.user.email }}</div>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-400 text-sm group-hover:text-green-600 transition-colors"></i>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-8 text-gray-500">
+                <i class="fas fa-user-friends text-4xl text-gray-300 mb-2"></i>
+                <p class="text-sm">No referrals yet</p>
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+
+</div>

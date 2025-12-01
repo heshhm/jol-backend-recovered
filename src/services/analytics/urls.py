@@ -11,4 +11,5 @@ urlpatterns = [
     path("dj-analytics/reporting/add-email/", views.add_email, name="add_email"),
     path("dj-analytics/reporting/delete-email/<int:email_id>/", views.delete_email, name="delete_email"),
     path("dj-analytics/reporting/email-logs/", views.email_logs_list, name="email_logs_list"),
+    path("dj-analytics/user/<int:user_id>/", views.user_detail, name="user_detail"),
 ]

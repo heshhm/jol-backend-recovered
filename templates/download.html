@@ -36,7 +36,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            max-width: 1200px; /* Slightly wider for 2 phones */
+            max-width: 1200px;
             margin: 0 auto;
             padding: 40px 20px;
             min-height: 100vh;
@@ -49,7 +49,7 @@
         .content-side {
             flex: 1;
             max-width: 450px;
-            z-index: 10; /* Ensure text is above floating elements */
+            z-index: 10;
         }
 
         .logo {
@@ -139,8 +139,8 @@
 
         /* ----- Right Column: Double Phone Illustration ----- */
         .illustration-side {
-            flex: 1.5; /* Give more space to images */
-            height: 650px; /* Fixed height container */
+            flex: 1.5;
+            height: 650px;
             position: relative;
             display: flex;
             align-items: center;
@@ -165,6 +165,7 @@
             padding: 12px;
             position: absolute;
             transition: transform 0.5s ease;
+            transform-origin: center center; /* Critical for scaling */
         }
 
         .phone-screen {
@@ -177,13 +178,13 @@
         }
         .phone-screen img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* Updated Smaller Notch */
+        /* Notch */
         .phone-notch {
             position: absolute;
             top: 12px;
             left: 50%;
             transform: translateX(-50%);
-            width: 90px; /* MUCH SMALLER */
+            width: 90px;
             height: 24px;
             background: #1a1a1a;
             border-bottom-left-radius: 14px;
@@ -191,25 +192,24 @@
             z-index: 6;
         }
 
-        /* Specific Positioning for Two Phones */
-        
-        /* The Back Phone (Left) */
+        /* Phone Positions - Desktop */
         .phone-left {
-            left: 5%;
-            top: 40px;
+            /* Position relative to center */
+            margin-right: 140px; /* Offset to left */
+            margin-top: 40px;
             transform: scale(0.9) rotate(-5deg);
             z-index: 4;
             box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-            filter: brightness(0.95); /* Slightly darker to push back */
+            filter: brightness(0.95);
         }
 
-        /* The Front Phone (Right) */
         .phone-right {
-            right: 10%;
-            top: 0;
+            /* Position relative to center */
+            margin-left: 140px; /* Offset to right */
+            margin-top: -40px;
             transform: rotate(5deg);
             z-index: 5;
-            box-shadow: 0 40px 80px rgba(0,0,0,0.4); /* Stronger shadow */
+            box-shadow: 0 40px 80px rgba(0,0,0,0.4);
         }
 
         /* Decorative Glows */
@@ -241,28 +241,75 @@
             50% { transform: translateY(-25px); }
         }
 
-        /* ----- Responsive Design ----- */
+        /* ----- RESPONSIVE DESIGN UPDATES ----- */
+        
+        /* Tablet & Small Desktop (Max 1024px) */
         @media (max-width: 1024px) {
             .main-container {
-                flex-direction: column-reverse;
+                flex-direction: column-reverse; /* Phones on top, Text on bottom */
                 text-align: center;
-                gap: 20px;
+                gap: 10px;
+                padding-top: 20px;
             }
-            .content-side { max-width: 100%; align-items: center; display: flex; flex-direction: column; }
-            .logo { margin-bottom: 20px; }
-            .download-buttons { width: 100%; max-width: 300px; }
+
+            .content-side { 
+                max-width: 100%; 
+                display: flex; 
+                flex-direction: column; 
+                align-items: center; 
+            }
+
+            .logo { margin-bottom: 20px; width: 80px; height: 80px; }
             
-            /* On tablet/mobile, adjust phone stacking */
-            .illustration-side { height: 500px; width: 100%; margin-bottom: 40px; }
-            .phone-mockup { width: 240px; height: 480px; }
-            .phone-left { left: 50%; transform: translateX(-80%) rotate(-5deg) scale(0.9); }
-            .phone-right { right: 50%; transform: translateX(80%) rotate(5deg); }
+            /* Center the phones container */
+            .illustration-side {
+                width: 100%;
+                height: 480px; /* Reduced height container */
+                margin-bottom: 0;
+            }
+
+            /* Adjust Phone Positions for Vertical Layout */
+            .phone-left {
+                margin-right: 0; /* Reset margins */
+                margin-top: 0;
+                /* Move using Translate to center them relative to each other */
+                transform: translateX(-35%) rotate(-5deg) scale(0.8);
+            }
+            .phone-right {
+                margin-left: 0;
+                margin-top: 0;
+                transform: translateX(35%) rotate(5deg) scale(0.8);
+            }
         }
 
+        /* Mobile (Max 600px) */
         @media (max-width: 600px) {
-            .illustration-side { height: 400px; }
-            .phone-mockup { width: 180px; height: 360px; }
+            .main-container { padding: 30px 20px; }
+            
             h1 { font-size: 2.2rem; }
+            .subtitle { font-size: 1rem; margin-bottom: 25px; }
+
+            .illustration-side {
+                height: 350px; /* Tighten height on mobile */
+            }
+
+            /* Scale phones down heavily for mobile to prevent overflow */
+            .phone-left {
+                transform: translateX(-35%) rotate(-5deg) scale(0.6);
+            }
+            .phone-right {
+                transform: translateX(35%) rotate(5deg) scale(0.6);
+            }
+
+            .download-buttons {
+                width: 100%;
+                max-width: 320px;
+            }
+            
+            .referral-badge {
+                padding: 10px 15px;
+                margin-bottom: 25px;
+            }
         }
     </style>
 </head>

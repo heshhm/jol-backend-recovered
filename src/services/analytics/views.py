@@ -458,7 +458,7 @@ def _render_users_tab(request, context):
     from src.services.user.models import UserProfile
     
     # Get all user profiles with related data
-    users_qs = UserProfile.objects.select_related('user').prefetch_related('wallet').order_by('-created_at')
+    users_qs = UserProfile.objects.select_related('user').order_by('-id')
     
     # Search filter
     search = request.GET.get('search', '').strip()
@@ -476,7 +476,7 @@ def _render_users_tab(request, context):
     
     # Stats
     total_users = UserProfile.objects.count()
-    users_with_referrals = UserProfile.objects.filter(total_referred__gt=0).count()
+    users_with_referrals = UserProfile.objects.filter(total_referrals__gt=0).count()
     
     context.update({
         'page_obj': page_obj,
@@ -487,3 +487,32 @@ def _render_users_tab(request, context):
     })
     
     return render(request, "django_analytics/partials/users_tab.html", context)
+
+
+@login_required
+@user_passes_test(_is_superuser)
+def user_detail(request, user_id):
+    """User detail page showing referral information"""
+    from src.services.user.models import UserProfile
+    from src.services.game.models import GameHistory
+    
+    profile = UserProfile.objects.select_related('user', 'referred_by__user').get(id=user_id)
+    
+    # Get users referred by this user
+    referred_users = UserProfile.objects.filter(referred_by=profile).select_related('user').order_by('-id')
+    
+    # Count games played
+    games_played = GameHistory.objects.filter(player=profile.user).count()
+    
+    context = {
+        'profile': profile,
+        'referred_users': referred_users,
+        'games_played': games_played,
+        'content_url': reverse('django_analytics:tab_content'),
+    }
+    
+    # HTMX partial or full page
+    if request.headers.get('HX-Request'):
+        return render(request, "django_analytics/partials/user_detail.html", context)
+    
+    return render(request, "django_analytics/user_detail.html", context)
