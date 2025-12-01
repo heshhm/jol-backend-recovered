@@ -13,8 +13,14 @@ DOMAIN = env("DOMAIN")
 PROTOCOL = env("PROTOCOL")
 BASE_URL = f"{PROTOCOL}://{DOMAIN}"
 
+
 ALLOWED_HOSTS = ["*"]
 CSRF_TRUSTED_ORIGINS = [f"{PROTOCOL}://{host}" for host in ALLOWED_HOSTS]
+
+# TODO: REMOVE THIS AFTER TESTING
+CSRF_TRUSTED_ORIGINS += [
+    "https://nonabstemiously-stocky-cynthia.ngrok-free.dev"
+]
 
 ROOT_URLCONF = "core.urls"
 WSGI_APPLICATION = "core.wsgi.application"
@@ -84,9 +90,7 @@ INSTALLED_APPS = [
     # Local apps
     "src.services.user",
     "src.services.game",
-
-    # TODO: REMOVE DJ_ANALYTICS
-    'django_analytics'
+    "src.services.analytics",
 
 ]
 
@@ -95,9 +99,8 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
 
     # CUSTOM MIDDLEWARE
-    'django_analytics.middleware.AnalyticsMiddleware',
+    'src.services.analytics.middleware.AnalyticsMiddleware',
 
-    # TODO: REMOVE DJ_ANALYTIC
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",

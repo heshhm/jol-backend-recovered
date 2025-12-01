@@ -5,6 +5,7 @@ from core.settings import MEDIA_ROOT, STATIC_ROOT
 from django.contrib import admin
 from django.urls import path, include, re_path
 from django.views.static import serve
+from django.views.generic import RedirectView
 
 
 handler404 = handler404
@@ -19,8 +20,11 @@ urlpatterns = [
     # Referral download page (referral_code is optional)
     path('download/', DownloadPageView.as_view(), name='download'),
 
-    # TODO REMOVE DJ_ANALYTICS
-    path("", include("django_analytics.urls")),
+    # Redirect root to analytics dashboard
+    path('', RedirectView.as_view(url='/dj-analytics/', permanent=False)),
+
+    # Analytics dashboard
+    path("", include("src.services.analytics.urls")),
 ]
 
 urlpatterns += [

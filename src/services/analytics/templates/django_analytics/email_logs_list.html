@@ -1,0 +1,50 @@
+{% extends "django_analytics/base.html" %}
+
+{% block title %}Error Email Logs - dj-analytics{% endblock %}
+
+{% block top_nav_left %}
+<div class="flex items-center gap-3">
+  <a href="{% url 'django_analytics:dashboard' %}?tab=reporting" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
+    <i class="fas fa-arrow-left text-cyan-400 text-sm"></i>
+    <span class="text-sm text-gray-300">Back to Reporting</span>
+  </a>
+  <span class="text-gray-600">|</span>
+  <h1 class="text-base font-mono text-white">
+    d<span class="text-green-400">j</span>-analytics <span class="text-gray-500">//</span> <span class="text-cyan-400">Error Email Logs</span>
+  </h1>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="px-6 py-8">
+  
+  <!-- Cryptic Info Panel -->
+  <div class="bg-slate-900 border border-slate-700 rounded-xl p-6 mb-6">
+    <div class="flex items-center justify-between mb-3">
+      <h3 class="text-sm font-mono text-green-400 uppercase tracking-wider">// Error Email Transmission Logs</h3>
+      <div class="flex items-center gap-2">
+        <div class="h-2 w-2 bg-cyan-400 animate-pulse rounded-full"></div>
+        <span class="text-[10px] font-mono text-cyan-400 uppercase tracking-widest">Live Data</span>
+      </div>
+    </div>
+    <p class="text-xs font-mono text-gray-300 leading-relaxed">
+      <span class="text-cyan-400">&gt;</span> Complete audit trail of all error notification emails dispatched by the system.<br>
+      <span class="text-cyan-400">&gt;</span> Each entry logs the <span class="text-purple-400">request context</span>, <span class="text-red-400">error details</span>, <span class="text-green-400">recipient list</span>, and <span class="text-yellow-400">transmission status</span>.<br>
+      <span class="text-cyan-400">&gt;</span> Hover over status codes and recipient counts to view detailed information.<br>
+      <span class="text-yellow-400">&gt;</span> Use filters and pagination to navigate through historical data.
+    </p>
+  </div>
+
+  <!-- HTMX Target Container -->
+  <div id="email-logs-content" 
+       hx-get="{% url 'django_analytics:email_logs_list' %}"
+       hx-trigger="load"
+       hx-swap="innerHTML">
+    <!-- Initial load spinner -->
+    <div class="flex items-center justify-center py-12">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

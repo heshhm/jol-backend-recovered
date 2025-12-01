@@ -69,7 +69,10 @@ class UserProfile(models.Model):
         """
         from django.conf import settings
         code = self.referral_code or ''
-        return f"{settings.BASE_URL}/download?refcode={code}"
+        return f"https://nonabstemiously-stocky-cynthia.ngrok-free.dev/download?refcode={code}"
+        # TODO: FIX THIS
+        # return f"{settings.BASE_URL}/download?refcode={code}"
+
     def save(self, *args, **kwargs):
         if not self.referral_code:
             self.referral_code = self.generate_referral_code()
@@ -135,6 +138,12 @@ class PendingReferral(models.Model):
     and the visitor's public IP address. Later matched at signup time.
     """
     referral_code = models.CharField(max_length=50, db_index=True)
+    referrer_profile = models.ForeignKey(
+        'UserProfile',
+        on_delete=models.CASCADE,
+        related_name='pending_referrals',
+        help_text="The user profile that owns this referral code"
+    )
     ip_address = models.GenericIPAddressField(db_index=True, help_text="IPv4 or IPv6 address")
     clicked_at = models.DateTimeField(auto_now_add=True, db_index=True)
 

@@ -8,6 +8,7 @@ from src.services.user.models import UserProfile, PendingReferral
 from src.commons.utils import get_client_ip
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class DownloadPageView(View):
 	"""
 	Simple download landing page.
@@ -34,27 +35,50 @@ class DownloadPageView(View):
 
 		return render(request, 'download.html', context)
 
-	@method_decorator(csrf_exempt)
 	def post(self, request):
 		# Expect JSON body with { "refcode": "ABC123", "store": "google_play" }
 		try:
 			import json
 			body = json.loads(request.body.decode() or '{}')
-		except Exception:
+		except Exception as e:
+			import logging
+			logger = logging.getLogger(__name__)
+			logger.warning(f"DownloadPageView POST: Failed to parse JSON body: {e}")
 			body = {}
 
 		refcode = (body.get('refcode') or request.GET.get('refcode'))
 		if not refcode:
 			return JsonResponse({'success': False, 'error': 'missing refcode'}, status=400)
 
+		# Validate referral code exists — avoid storing bogus codes; still prefer IP attribution later
+		try:
+			profile = UserProfile.objects.get(referral_code=refcode.upper())
+		except UserProfile.DoesNotExist:
+			return JsonResponse({'success': False, 'error': 'invalid refcode'}, status=400)
+
 		client_ip = get_client_ip(request)
 		if not client_ip:
 			return JsonResponse({'success': False, 'error': 'could not determine ip'}, status=400)
 
-		# Avoid duplicate unredeemed entries for same ip+code
-		existing = PendingReferral.objects.filter(referral_code=refcode.upper(), ip_address=client_ip, redeemed_at__isnull=True).first()
+		# Avoid duplicate unredeemed entries for same ip+referrer_profile
+		existing = PendingReferral.objects.filter(
+			referrer_profile=profile,
+			ip_address=client_ip,
+			redeemed_at__isnull=True
+		).first()
 		if existing:
 			return JsonResponse({'success': True, 'tracked': False, 'already_exists': True})
 
-		PendingReferral.objects.create(referral_code=refcode.upper(), ip_address=client_ip)
-		return JsonResponse({'success': True, 'tracked': True})
+		# Create the pending referral with FK to the referrer profile
+		try:
+			PendingReferral.objects.create(
+				referral_code=refcode.upper(),
+				referrer_profile=profile,
+				ip_address=client_ip
+			)
+			return JsonResponse({'success': True, 'tracked': True})
+		except Exception as e:
+			import logging
+			logger = logging.getLogger(__name__)
+			logger.error(f"DownloadPageView POST: Failed to create PendingReferral: {e}")
+			return JsonResponse({'success': False, 'error': 'failed to track click'}, status=500)

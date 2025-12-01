@@ -108,7 +108,7 @@ class ProcessReferralAPIView(APIView):
         Prefer IP-based attribution. Flow:
         - If user already has referred_by, do nothing.
         - Try to find an unredeemed PendingReferral by the request IP.
-        - If found, use its referral_code; otherwise, fall back to explicit referral_code in body.
+        - If found, use the referrer_profile FK directly; otherwise, fall back to explicit referral_code in body.
         - Prevent self-referral and duplicate processing.
         - Atomically mark PendingReferral redeemed, increment referrer's total_referrals and coins,
           and credit new user if applicable.
@@ -117,72 +117,103 @@ class ProcessReferralAPIView(APIView):
         from src.services.user.models import PendingReferral
         from django.utils import timezone
 
+        user_id = request.user.id
+        print(f"\n>>> [REF] Starting referral process for User ID: {user_id}")
+
         new_user_profile = request.user.profile
+
         # If already referred, nothing to do
         if new_user_profile.referred_by:
+            print(f">>> [REF] User {user_id} already has referrer: {new_user_profile.referred_by.id}. Aborting.")
             return Response({"message": "Referral processed successfully"})
 
         # Try IP-based lookup first
         client_ip = get_client_ip(request)
+        print(f">>> [REF] Client IP detected: {client_ip}")
+
         pending = None
+        code_owner = None
+        attributed_via = None
+
         if client_ip:
-            pending = PendingReferral.objects.filter(
+            pending = PendingReferral.objects.select_related('referrer_profile').filter(
                 ip_address=client_ip,
                 redeemed_at__isnull=True
             ).order_by('-clicked_at').first()
 
-        raw_code = None
         if pending:
-            raw_code = pending.referral_code
+            # Use the FK directly — no lookup needed
+            code_owner = pending.referrer_profile
             attributed_via = 'ip'
+            print(f">>> [REF] Found PendingReferral via IP. ID: {pending.id}, Referrer: {code_owner.user_id}")
         else:
+            # Fallback: explicit referral_code in body
             raw_code = request.data.get('referral_code', '').strip().upper()
-            attributed_via = 'code' if raw_code else None
+            print(f">>> [REF] No IP match. Attempting manual code: '{raw_code}'")
 
-        if not raw_code:
+            if raw_code:
+                try:
+                    code_owner = UserProfile.objects.get(referral_code=raw_code)
+                    attributed_via = 'code'
+                    print(f">>> [REF] Manual code owner found. Owner User ID: {code_owner.user_id}")
+                except UserProfile.DoesNotExist:
+                    print(f">>> [REF] Manual code '{raw_code}' does not exist in DB.")
+
+        if not code_owner:
+            print(">>> [REF] No referral code present (neither IP nor manual). Exiting.")
             return Response({"message": "Referral processed successfully"})
 
         # Prevent self-referral
-        if raw_code == new_user_profile.referral_code:
-            return Response({"message": "Referral processed successfully"})
-
-        try:
-            code_owner = UserProfile.objects.get(referral_code=raw_code)
-        except UserProfile.DoesNotExist:
+        if code_owner.id == new_user_profile.id:
+            print(f">>> [REF] Self-referral detected for user {user_id}. Aborting.")
             return Response({"message": "Referral processed successfully"})
 
         # Atomic update: credit referrer (if under limit) and mark pending as redeemed
         code_owner_rewarded = False
-        with transaction.atomic():
-            code_owner_locked = UserProfile.objects.select_for_update().get(id=code_owner.id)
-            # Give referrer bonus if still under limit
-            if code_owner_locked.total_referrals < REFERRALS_LIMIT:
-                updated = UserProfile.objects.filter(
-                    id=code_owner.id, total_referrals__lt=REFERRALS_LIMIT
-                ).update(total_referrals=F('total_referrals') + 1)
+        print(">>> [REF] Entering atomic transaction block...")
 
-                if updated and CODE_OWNER_BONUS > 0:
-                    code_owner_locked.user.get_wallet().increment_coins(CODE_OWNER_BONUS)
-                    code_owner_rewarded = True
+        try:
+            with transaction.atomic():
+                code_owner_locked = UserProfile.objects.select_for_update().get(id=code_owner.id)
+                print(f">>> [REF] Locked owner profile. Current referrals: {code_owner_locked.total_referrals}")
 
-            # Set referred_by on new user's profile
-            # lock new_user_profile row to avoid races
-            new_profile_locked = UserProfile.objects.select_for_update().get(id=new_user_profile.id)
-            new_profile_locked.referred_by = code_owner_locked
-            new_profile_locked.save()
+                # Give referrer bonus if still under limit
+                if code_owner_locked.total_referrals < REFERRALS_LIMIT:
+                    updated = UserProfile.objects.filter(
+                        id=code_owner.id, total_referrals__lt=REFERRALS_LIMIT
+                    ).update(total_referrals=F('total_referrals') + 1)
 
-            # If we matched via pending referral, mark it redeemed
-            if pending:
-                pending.redeemed_at = timezone.now()
-                pending.redeemed_by = request.user
-                pending.save()
+                    if updated and CODE_OWNER_BONUS > 0:
+                        code_owner_locked.user.get_wallet().increment_coins(CODE_OWNER_BONUS)
+                        code_owner_rewarded = True
+                        print(f">>> [REF] Owner credited with bonus: {CODE_OWNER_BONUS}")
+                else:
+                    print(f">>> [REF] Owner hit referral limit ({REFERRALS_LIMIT}). No bonus given.")
 
-        # Give bonus to new user only if referrer was rewarded
-        if code_owner_rewarded and NEW_USER_BONUS > 0:
-            request.user.get_wallet().increment_coins(NEW_USER_BONUS)
+                # Set referred_by on new user's profile
+                new_profile_locked = UserProfile.objects.select_for_update().get(id=new_user_profile.id)
+                new_profile_locked.referred_by = code_owner_locked
+                new_profile_locked.save()
+                print(f">>> [REF] Linked new user {user_id} to referrer {code_owner_locked.id}")
 
-        return Response({"message": "Referral processed successfully", "attributed_via": attributed_via})
+                # If we matched via pending referral, mark it redeemed
+                if pending:
+                    pending.redeemed_at = timezone.now()
+                    pending.redeemed_by = request.user
+                    pending.save()
+                    print(f">>> [REF] PendingReferral {pending.id} marked as redeemed.")
 
+            # Give bonus to new user only if referrer was rewarded
+            if code_owner_rewarded and NEW_USER_BONUS > 0:
+                request.user.get_wallet().increment_coins(NEW_USER_BONUS)
+                print(f">>> [REF] New user {user_id} credited with join bonus: {NEW_USER_BONUS}")
+
+            print(">>> [REF] Referral process completed successfully.")
+            return Response({"message": "Referral processed successfully", "attributed_via": attributed_via})
+
+        except Exception as e:
+            print(f">>> [REF] ERROR: Referral process failed for user {user_id}: {e}")
+            return Response({"error": "Referral processing failed"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class ErrorTestAPIView(APIView):
     """

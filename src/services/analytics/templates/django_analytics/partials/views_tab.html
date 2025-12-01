@@ -1,0 +1,120 @@
+<!-- django_analytics/partials/views_tab.html -->
+<div class="space-y-6">
+  
+  <!-- Info Banner -->
+  <div class="bg-slate-900 border border-slate-700 rounded-xl p-6">
+    <div class="flex-1 space-y-3">
+      <div class="flex items-center justify-between">
+        <h3 class="text-sm font-mono text-green-400 uppercase tracking-wider">// View Performance Analysis</h3>
+        <div class="flex items-center gap-2">
+          <div class="h-2 w-2 bg-green-400 animate-pulse rounded-full"></div>
+          <span class="text-[10px] font-mono text-green-400 uppercase tracking-widest">Tracking</span>
+        </div>
+      </div>
+      <p class="text-xs font-mono text-gray-300 leading-relaxed">
+        <span class="text-cyan-400">&gt;</span> Comprehensive analytics for all registered Django views and URL patterns.<br>
+        <span class="text-cyan-400">&gt;</span> Monitor <span class="text-blue-400 font-semibold">call frequency</span>, <span class="text-orange-400 font-semibold">error rates</span>, and <span class="text-purple-400 font-semibold">response times</span> per endpoint.<br>
+        <span class="text-cyan-400">&gt;</span> Click any view to access detailed request history and performance breakdowns.
+      </p>
+    </div>
+  </div>
+  
+  <div class="flex items-center justify-between">
+    <h2 class="text-xl font-semibold text-gray-900">All Views</h2>
+  </div>
+
+  <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+    <!-- App Filter -->
+    <div class="flex items-center gap-2">
+      <label for="app-filter" class="text-xs font-medium text-gray-600 whitespace-nowrap">App:</label>
+      <select id="app-filter" class="text-xs border border-gray-300 rounded-lg px-3 py-1.5 bg-white text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+        <option value="all">All Apps</option>
+        {% for a in apps %}
+        <option value="{{ a }}">{{ a }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Sort By Filter -->
+    <div class="flex items-center gap-2">
+      <label for="sort-filter" class="text-xs font-medium text-gray-600 whitespace-nowrap">Sort by:</label>
+      <select id="sort-filter"
+              name="sort"
+              class="text-xs border border-gray-300 rounded-lg px-3 py-1.5 bg-white text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              hx-get="{{ content_url }}?tab=views"
+              hx-target="#tab-content"
+              hx-include="#sort-filter"
+              hx-trigger="change"
+              hx-push-url="true">
+        <option value="calls" {% if current_sort == 'calls' or not current_sort %}selected{% endif %}>Most Calls</option>
+        <option value="errors" {% if current_sort == 'errors' %}selected{% endif %}>Highest Error Rate</option>
+        <option value="duration" {% if current_sort == 'duration' %}selected{% endif %}>Slowest (Avg Time)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full">
+      <thead>
+        <tr class="bg-gray-50 border-b border-gray-200">
+          <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">View Name</th>
+          <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">URL Pattern</th>
+          <th class="px-5 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Calls</th>
+          <th class="px-5 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Avg Duration</th>
+          <th class="px-5 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Error Rate</th>
+          <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Last Called</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200">
+        {% for v in views %}
+        <tr data-app="{{ v.app }}" class="hover:bg-gray-50 cursor-pointer transition-colors" 
+            hx-get="{{ content_url }}?tab=views&view={{ v.name }}" 
+            hx-target="#tab-content" 
+            hx-push-url="true">
+          <td class="px-5 py-3">
+            <span class="font-mono text-xs text-gray-900">{{ v.name }}</span>
+          </td>
+          <td class="px-5 py-3">
+            <span class="text-xs text-gray-500 font-mono">{{ v.url|truncatechars:50 }}</span>
+          </td>
+          <td class="px-5 py-3 text-right">
+            <span class="text-sm font-semibold text-gray-900">{{ v.total_calls }}</span>
+          </td>
+          <td class="px-5 py-3 text-right">
+            <span class="font-mono text-sm text-gray-900">{{ v.avg_duration }}<span class="text-gray-500 text-xs ml-0.5">ms</span></span>
+          </td>
+          <td class="px-5 py-3 text-right">
+            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold {% if v.error_rate > 5 %}bg-red-100 text-red-700{% elif v.error_rate > 1 %}bg-orange-100 text-orange-700{% else %}bg-green-100 text-green-700{% endif %}">
+              {{ v.error_rate }}%
+            </span>
+          </td>
+          <td class="px-5 py-3">
+            {% if v.last_called %}
+              <span class="text-xs text-gray-500">{{ v.last_called|time:"H:i:s" }}</span>
+            {% else %}
+              <span class="text-xs text-gray-400 italic">never</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="text-center py-12 text-sm text-gray-500">No views tracked</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const select = document.getElementById('app-filter');
+  if (!select) return;
+  select.addEventListener('change', function(){
+    const value = this.value;
+    document.querySelectorAll('tr[data-app]').forEach(row => {
+      row.style.display = (value === 'all' || row.dataset.app === value) ? '' : 'none';
+    });
+  });
+})();
+</script>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JOL Game Engine Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: "Roboto", "Lucida Grande", Verdana, Arial, sans-serif;
+            background: #f8f8f8;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        #container {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 420px;
+            width: 100%;
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        #header {
+            background: #417690;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        #header h1 {
+            font-size: 22px;
+            font-weight: 300;
+            margin: 0;
+            letter-spacing: 0.5px;
+        }
+        
+        #content {
+            padding: 30px;
+        }
+        
+        .form-row {
+            margin-bottom: 20px;
+        }
+        
+        .form-row label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            color: #666;
+            margin-bottom: 8px;
+            text-transform: capitalize;
+        }
+        
+        .form-row input[type="text"],
+        .form-row input[type="password"],
+        .form-row input[type="email"] {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        
+        .form-row input[type="text"]:focus,
+        .form-row input[type="password"]:focus,
+        .form-row input[type="email"]:focus {
+            outline: none;
+            border-color: #417690;
+            box-shadow: 0 0 0 2px rgba(65, 118, 144, 0.1);
+        }
+        
+        .form-row input[type="checkbox"] {
+            margin-right: 6px;
+        }
+        
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .checkbox-row label {
+            font-weight: 400;
+            margin: 0;
+            text-transform: none;
+        }
+        
+        .submit-row {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .submit-row input[type="submit"] {
+            background: #417690;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .submit-row input[type="submit"]:hover {
+            background: #315d75;
+        }
+        
+        .submit-row input[type="submit"]:active {
+            background: #254757;
+        }
+        
+        .errorlist {
+            list-style: none;
+            margin: 0 0 15px 0;
+            padding: 10px 15px;
+            background: #ffc;
+            border: 1px solid #ed9;
+            border-radius: 4px;
+            color: #c44;
+            font-size: 13px;
+        }
+        
+        .errorlist li {
+            margin: 4px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="header">
+            <h1>JOL GAME ENGINE LOGIN</h1>
+        </div>
+        
+        <div id="content">
+            {% if form.non_field_errors %}
+                <ul class="errorlist">
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            
+            <form method="post" action="{% url 'account_login' %}">
+                {% csrf_token %}
+                
+                <div class="form-row">
+                    <label for="{{ form.login.id_for_label }}">Username:</label>
+                    {{ form.login }}
+                    {% if form.login.errors %}
+                        <ul class="errorlist">
+                            {% for error in form.login.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                
+                <div class="form-row">
+                    <label for="{{ form.password.id_for_label }}">Password:</label>
+                    {{ form.password }}
+                    {% if form.password.errors %}
+                        <ul class="errorlist">
+                            {% for error in form.password.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                
+                <div class="form-row">
+                    <div class="checkbox-row">
+                        {{ form.remember }}
+                        <label for="{{ form.remember.id_for_label }}">Remember me</label>
+                    </div>
+                </div>
+                
+                {% if redirect_field_value %}
+                    <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+                {% endif %}
+                
+                <div class="submit-row">
+                    <input type="submit" value="Log in">
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

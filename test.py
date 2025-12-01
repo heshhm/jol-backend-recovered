@@ -24,25 +24,13 @@ def main():
     except Exception:
         user_pk = None
 
-    # Create a few sample games for the admin user
-    # 1) Solo timed (high accuracy)
-    payload1 = solo_timed_payload(player_id=user_pk)
-    add_game(token, payload_override=payload1)
-
-    # 2) Solo untimed
-    payload2 = solo_untimed_payload(player_id=user_pk)
-    add_game(token, payload_override=payload2)
-
-    # 3) Multiplayer - 1st place
-    payload3 = multiplayer_payload(player_id=user_pk, position=1)
-    add_game(token, payload_override=payload3)
-
-    # 4) Multiplayer - lower place
-    payload4 = multiplayer_payload(player_id=user_pk, position=3)
-    add_game(token, payload_override=payload4)
-
-    # List games to verify
-    list_games(token)
+    # ADD A TEST FOR THE PROCESS-REFERRAL ENDPOINT
+    if user_pk:
+        url = f"{BASE_URL}/v1/user/process-referral/"
+        payload = {
+        }
+        response = requests.post(url, json=payload, headers=headers)
+        print("Process Referral API Response:", response.status_code, response.json())
 
 
 if __name__ == "__main__":

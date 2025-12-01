@@ -1,0 +1,82 @@
+{% extends "django_analytics/base.html" %}
+
+{% block title %}Dashboard - dj-analytics{% endblock %}
+
+{% block top_nav_left %}
+<div class="flex items-center gap-3" id="top-nav-left">
+  <button onclick="toggleSidebar()" class="p-2 -ml-2 text-gray-400 hover:text-gray-200 hover:bg-slate-800 rounded-lg transition-colors">
+    <i class="fas fa-bars text-lg"></i>
+  </button>
+  <h1 class="text-base font-mono text-white">
+    d<span class="text-green-400">j</span>-analytics
+  </h1>
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="tab-content"
+     class="p-6"
+     hx-get="{{ content_url }}?tab={{ active_tab }}"
+     hx-trigger="load"
+     hx-target="this"
+     hx-swap="innerHTML">
+  <!-- Loads via HTMX -->
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Update top nav dynamically based on current tab/view
+function updateTopNav() {
+  const params = new URLSearchParams(window.location.search);
+  const tab = params.get('tab') || 'dashboard';
+  const view = params.get('view');
+  const topNavLeft = document.getElementById('top-nav-left');
+  
+  if (!topNavLeft) return;
+  
+  if (tab === 'views' && view) {
+    // View detail page
+    topNavLeft.innerHTML = `
+      <a href="#" 
+         hx-get="{{ content_url }}?tab=views" 
+         hx-target="#tab-content" 
+         hx-push-url="true"
+         class="flex items-center gap-2 hover:opacity-80 transition-opacity">
+        <i class="fas fa-arrow-left text-cyan-400 text-sm"></i>
+        <span class="text-sm text-gray-300">Back to Views</span>
+      </a>
+      <span class="text-gray-600">|</span>
+      <h1 class="text-base font-mono text-white">
+        View Detail <span class="text-gray-500">//</span> <span class="text-cyan-400">${decodeURIComponent(view)}</span>
+      </h1>
+    `;
+    htmx.process(topNavLeft);
+  } else {
+    // Default view - show current tab name
+    let tabName = 'Dashboard';
+    if (tab === 'views') tabName = 'Views';
+    else if (tab === 'reporting') tabName = 'Reporting';
+    
+    topNavLeft.innerHTML = `
+      <button onclick="toggleSidebar()" class="p-2 -ml-2 text-gray-400 hover:text-gray-200 hover:bg-slate-800 rounded-lg transition-colors">
+        <i class="fas fa-bars text-lg"></i>
+      </button>
+      <h1 class="text-base font-mono text-white">
+        ${tabName}
+      </h1>
+    `;
+  }
+}
+
+// Update on HTMX swap
+document.body.addEventListener('htmx:afterSwap', function (e) {
+  if (e.detail.target.id === 'tab-content') {
+    updateTopNav();
+  }
+});
+
+// Update on initial load
+updateTopNav();
+</script>
+{% endblock %}

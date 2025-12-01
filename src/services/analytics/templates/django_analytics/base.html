@@ -1,0 +1,194 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>{% block title %}dj-analytics{% endblock %}</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/png" href="{% static 'django_analytics/favicon.png' %}?v=2">
+  
+  <!-- CDN Assets (reliable and fast) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+  <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  
+  <style>
+    * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  </style>
+  
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-gray-50 font-sans antialiased">
+  <div class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    {% block sidebar %}
+    <div id="sidebar" class="w-64 bg-slate-900 text-white flex-shrink-0 transition-all duration-300 border-r border-slate-800">
+      {% include "django_analytics/partials/sidebar.html" %}
+    </div>
+    {% endblock %}
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col overflow-hidden bg-gray-50">
+
+      <!-- Top Navigation Bar -->
+      <nav class="bg-slate-900 border-b border-slate-700">
+        <div class="px-6 h-16 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            {% block top_nav_left %}
+            <button onclick="toggleSidebar()" class="p-2 -ml-2 text-gray-400 hover:text-gray-200 hover:bg-slate-800 rounded-lg transition-colors">
+              <i class="fas fa-bars text-lg"></i>
+            </button>
+            <h1 class="text-base font-mono text-white">
+              d<span class="text-green-400">j</span>-analytics
+            </h1>
+            {% endblock %}
+          </div>
+          
+          <!-- User Avatar Dropdown -->
+          <div class="relative">
+            <button onclick="toggleUserDropdown()" class="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-800 transition-colors">
+              <img src="https://ui-avatars.com/api/?name={{ request.user.get_full_name|default:request.user.username }}&background=3b82f6&color=fff&size=32" 
+                   alt="User Avatar" 
+                   class="w-7 h-7 rounded-full border-2 border-cyan-400">
+              <i class="fas fa-chevron-down text-xs text-gray-400"></i>
+            </button>
+            
+            <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-56 bg-slate-800 rounded-lg shadow-lg border border-slate-700 py-1 z-50">
+              <div class="px-4 py-2 border-b border-slate-700">
+                <p class="text-sm font-semibold text-white">{{ request.user.username }}</p>
+                <p class="text-xs text-gray-400">{{ request.user.email }}</p>
+              </div>
+              <a href="/admin/" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:bg-slate-700 transition-colors">
+                <i class="fas fa-cog w-4"></i>
+                <span>Django Admin</span>
+              </a>
+              <a href="https://github.com/hesham-04/dj-cnvx/" target="_blank" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:bg-slate-700 transition-colors">
+                <i class="fab fa-github w-4"></i>
+                <h3 class="text-base font-mono text-white">
+                  /d<span class="text-green-400">j</span>-analytics/
+                 </h3>
+              </a>
+              <div class="border-t border-slate-700 my-1"></div>
+              <form method="post" action="{% url 'admin:logout' %}" class="m-0">
+                {% csrf_token %}
+                <button type="submit" class="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-400 hover:bg-slate-700 transition-colors">
+                  <i class="fas fa-sign-out-alt w-4"></i>
+                  <span>Log Out</span>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Main Content Area -->
+      <div class="flex-1 overflow-auto">
+        {% block content %}{% endblock %}
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- GLOBAL SCRIPTS – run once, survive every HTMX swap           -->
+  <!-- ============================================================= -->
+  <script>
+    /* ---------- User dropdown toggle ---------- */
+    function toggleUserDropdown() {
+      const dropdown = document.getElementById('user-dropdown');
+      dropdown.classList.toggle('hidden');
+    }
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+      const dropdown = document.getElementById('user-dropdown');
+      const button = e.target.closest('button[onclick="toggleUserDropdown()"]');
+      if (!button && dropdown && !dropdown.contains(e.target)) {
+        dropdown.classList.add('hidden');
+      }
+    });
+
+    /* ---------- Sidebar toggle ---------- */
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      if (sidebar) {
+        sidebar.classList.toggle('w-64');
+        sidebar.classList.toggle('w-16');
+        document.querySelectorAll('.sidebar-text').forEach(el => el.classList.toggle('hidden'));
+        document.querySelectorAll('.sidebar-collapsed').forEach(el => el.classList.toggle('hidden'));
+      }
+    }
+
+    /* ---------- Keep sidebar active tab in sync ---------- */
+    function syncSidebarActiveTab() {
+      const params = new URLSearchParams(window.location.search);
+      const tab = params.get('tab') || 'dashboard';
+      document.querySelectorAll('#sidebar a').forEach(a => a.classList.remove('bg-gray-800'));
+      const match = Array.from(document.querySelectorAll('#sidebar a')).find(a => {
+        const hx = a.getAttribute('hx-get') || '';
+        return hx.includes('?tab=' + tab) || hx.includes('tab=' + tab);
+      });
+      if (match) match.classList.add('bg-gray-800');
+    }
+    if (document.getElementById('sidebar')) {
+      syncSidebarActiveTab();
+      document.body.addEventListener('htmx:afterSwap', syncSidebarActiveTab);
+      window.addEventListener('popstate', syncSidebarActiveTab);
+    }
+
+    /* ---------- ROW-TOGGLE – ONE GLOBAL LISTENER ---------- */
+    document.addEventListener('click', function rowToggle(e) {
+      const row = e.target.closest('tr[data-request-id]');
+      if (!row) return;
+
+      const id = row.getAttribute('data-request-id');
+      const detail = document.getElementById('detail-' + id);
+      if (!detail) return;
+
+      const isOpen = row.getAttribute('aria-expanded') === 'true';
+      const willOpen = !isOpen;
+
+      row.setAttribute('aria-expanded', willOpen);
+      detail.style.display = willOpen ? '' : 'none';
+
+      const caret = row.querySelector('.caret-icon');
+      if (caret) {
+        caret.style.transition = 'transform .15s';
+        caret.style.transform = willOpen ? 'rotate(90deg)' : 'rotate(0deg)';
+      }
+    });
+
+    // GLOBAL: Rebuild any chart
+    function rebuildChart(canvasId, labels, datasets) {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+      if (canvas.chart) canvas.chart.destroy();
+      canvas.chart = new Chart(canvas, {
+        type: 'bar',
+        data: { labels, datasets },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                usePointStyle: true,
+                padding: 15,
+                font: { size: 12, family: 'system-ui' }
+              }
+            }
+          },
+          scales: {
+            x: { stacked: true, grid: { display: false } },
+            y: { stacked: true, beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }
+          }
+        }
+      });
+    }
+  </script>
+
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>
