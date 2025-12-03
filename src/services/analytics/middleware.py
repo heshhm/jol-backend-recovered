@@ -18,7 +18,6 @@ class AnalyticsMiddleware(MiddlewareMixin):
     - Logs all requests to RequestLog
     - Sends email notifications on 5xx errors when enabled
     """
-    
     def process_request(self, request):
         request_id = str(uuid.uuid4())[:12]
         request._analytics = {
@@ -27,6 +26,15 @@ class AnalyticsMiddleware(MiddlewareMixin):
         }
         # Store request_id for error reporting to use
         request._analytics_request_id = request_id
+
+        # Determine client IP (respect X-Forwarded-For if present) and print it
+        xff = request.META.get("HTTP_X_FORWARDED_FOR")
+        if xff:
+            ip = xff.split(",")[0].strip()
+        else:
+            ip = request.META.get("REMOTE_ADDR")
+        print(ip)
+        logger.info("Request %s IP: %s", request_id, ip)
 
     def process_exception(self, request, exception):
         analytics = getattr(request, "_analytics", {})
