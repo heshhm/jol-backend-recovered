@@ -5,21 +5,21 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env(DEBUG=(bool, True))
 environ.Env.read_env(BASE_DIR / ".env")
 
-DEBUG = env("DEBUG")
+# ======================================================================================  ENV & CORE
+DEBUG = env.bool("DEBUG", default=False)
 SECRET_KEY = env("SECRET_KEY")
-ENVIRONMENT = env("ENVIRONMENT")
+ENVIRONMENT = env("ENVIRONMENT", default="local")
 
 DOMAIN = env("DOMAIN")
-PROTOCOL = env("PROTOCOL")
+PROTOCOL = env("PROTOCOL", default="http")
 BASE_URL = f"{PROTOCOL}://{DOMAIN}"
 
+# ALLOWED HOSTS (must be list)
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
 
-ALLOWED_HOSTS = ["*"]
-CSRF_TRUSTED_ORIGINS = [f"{PROTOCOL}://{host}" for host in ALLOWED_HOSTS]
-
-# TODO: REMOVE THIS AFTER TESTING
-CSRF_TRUSTED_ORIGINS += [
-    "https://nonabstemiously-stocky-cynthia.ngrok-free.dev"
+# CSRF trusted origins
+CSRF_TRUSTED_ORIGINS = [
+    f"{PROTOCOL}://{host}" for host in ALLOWED_HOSTS
 ]
 
 ROOT_URLCONF = "core.urls"
@@ -189,6 +189,7 @@ PHONENUMBER_DEFAULT_FORMAT = "NATIONAL"
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.TokenAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
@@ -196,9 +197,22 @@ REST_FRAMEWORK = {
     ],
 }
 
+
 # SERVER ADMINS FOR AUTOMATED ERROR EMAILS
 ADMINS = [
     ('Hesham', 'iamhuman0078@gmail.com'),
     ('Mueen', 'mueenaly.official@gmail.com')
 ]
 SERVER_EMAIL = env("DEFAULT_FROM_EMAIL")
+
+
+
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_SSL_REDIRECT = PROTOCOL == "https"
+
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
