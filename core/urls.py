@@ -21,7 +21,7 @@ urlpatterns = [
     path('download/', DownloadPageView.as_view(), name='download'),
 
     # Redirect root to analytics dashboard
-    path('', RedirectView.as_view(url='/dj-analytics/', permanent=False)),
+    path('', RedirectView.as_view(url='/download/', permanent=False)),
 
     # Analytics dashboard
     path("", include("src.services.analytics.urls")),
