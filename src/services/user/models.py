@@ -5,6 +5,9 @@ from django.db import models
 from django.db.models import F
 from django_resized import ResizedImageField
 
+from core.settings import BASE_URL
+
+
 def user_avatar_path(instance, filename):
     ext = filename.split(".")[-1]
     return f"avatars/{uuid.uuid4()}/{uuid.uuid4()}.{ext}"
@@ -69,7 +72,7 @@ class UserProfile(models.Model):
         """
         from django.conf import settings
         code = self.referral_code or ''
-        return f"https://nonabstemiously-stocky-cynthia.ngrok-free.dev/download?refcode={code}"
+        return f"{BASE_URL}/download?refcode={code}"
         # TODO: FIX THIS
         # return f"{settings.BASE_URL}/download?refcode={code}"
 
