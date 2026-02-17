@@ -90,16 +90,12 @@ INSTALLED_APPS = [
     # Local apps
     "src.services.user",
     "src.services.game",
-    "src.services.analytics",
 
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-
-    # CUSTOM MIDDLEWARE
-    'src.services.analytics.middleware.AnalyticsMiddleware',
 
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -198,12 +194,6 @@ REST_FRAMEWORK = {
 }
 
 
-# SERVER ADMINS FOR AUTOMATED ERROR EMAILS
-ADMINS = [
-    ('Hesham', 'iamhuman0078@gmail.com'),
-    ('Mueen', 'mueenaly.official@gmail.com')
-]
-SERVER_EMAIL = env("DEFAULT_FROM_EMAIL")
 
 
 if not DEBUG:

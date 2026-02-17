@@ -20,11 +20,8 @@ urlpatterns = [
     # Referral download page (referral_code is optional)
     path('download/', DownloadPageView.as_view(), name='download'),
 
-    # Redirect root to analytics dashboard
+    # Redirect root to download page
     path('', RedirectView.as_view(url='/download/', permanent=False)),
-
-    # Analytics dashboard
-    path("", include("src.services.analytics.urls")),
 ]
 
 urlpatterns += [
