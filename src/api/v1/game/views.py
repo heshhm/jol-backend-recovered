@@ -106,7 +106,6 @@ class LeaderboardView(APIView):
                 "rank": offset + idx + 1,
                 "user_id": item["player"],
                 "username": profile.user.username,
-                "email": profile.user.email,
                 "avatar": profile.avatar.url if profile.avatar else None,
                 "total_points": item["period_points"] or 0,
                 "games_played": item["games_played"],
