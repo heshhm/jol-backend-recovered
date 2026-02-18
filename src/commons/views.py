@@ -14,14 +14,14 @@ class PasswordResetConfirmPageView(View):
     Validates the token on load — shows error state if invalid/expired.
     """
     def get(self, request, uidb64, token):
-        from django.contrib.auth.tokens import default_token_generator
-        from django.utils.http import urlsafe_base64_decode
+        from allauth.account.utils import url_str_to_user_pk
+        from allauth.account.forms import default_token_generator
         from django.contrib.auth import get_user_model
         User = get_user_model()
 
         valid = False
         try:
-            uid = urlsafe_base64_decode(uidb64).decode()
+            uid = url_str_to_user_pk(uidb64)
             user = User.objects.get(pk=uid)
             valid = default_token_generator.check_token(user, token)
         except (TypeError, ValueError, OverflowError, User.DoesNotExist):
