@@ -11,13 +11,26 @@ from src.commons.utils import get_client_ip
 class PasswordResetConfirmPageView(View):
     """
     Renders a branded HTML page for password reset.
-    The email link (with uid/token in the URL) lands here.
-    The page uses JS to POST to the DRF API endpoint.
+    Validates the token on load — shows error state if invalid/expired.
     """
     def get(self, request, uidb64, token):
+        from django.contrib.auth.tokens import default_token_generator
+        from django.utils.http import urlsafe_base64_decode
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+
+        valid = False
+        try:
+            uid = urlsafe_base64_decode(uidb64).decode()
+            user = User.objects.get(pk=uid)
+            valid = default_token_generator.check_token(user, token)
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            valid = False
+
         return render(request, 'password_reset_confirm.html', {
             'uid': uidb64,
             'token': token,
+            'valid': valid,
         })
 
 
