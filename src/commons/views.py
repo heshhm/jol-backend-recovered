@@ -8,6 +8,19 @@ from src.services.user.models import UserProfile, PendingReferral
 from src.commons.utils import get_client_ip
 
 
+class PasswordResetConfirmPageView(View):
+    """
+    Renders a branded HTML page for password reset.
+    The email link (with uid/token in the URL) lands here.
+    The page uses JS to POST to the DRF API endpoint.
+    """
+    def get(self, request, uidb64, token):
+        return render(request, 'password_reset_confirm.html', {
+            'uid': uidb64,
+            'token': token,
+        })
+
+
 @method_decorator(csrf_exempt, name='dispatch')
 class DownloadPageView(View):
 	"""

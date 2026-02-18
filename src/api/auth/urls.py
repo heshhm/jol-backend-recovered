@@ -14,7 +14,7 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(), name='rest_logout'),
     path('password/change/', PasswordChangeView.as_view(), name='rest_password_change'),
     path('password/reset/', PasswordResetView.as_view(), name='rest_password_reset'),
-    re_path(r'^password/reset/confirm/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>.+)/$', PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    re_path(r'^password/reset/confirm/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>.+)/$', PasswordResetConfirmView.as_view(), name='rest_password_reset_confirm'),
     path('deactivate/', DeactivateUserAPIView.as_view(), name='deactivate'),
     # path('delete/', DeleteUserAPIView.as_view(), name='delete_user'),
 
