@@ -59,10 +59,8 @@ class GameHistoryCreateSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 class GameHistorySerializer(serializers.ModelSerializer):
-    # The source='points_earned' argument successfully tells DRF:
-    # "When populating final_score, look at the points_earned column in the database."
-
-    final_score = serializers.IntegerField(source='points_earned', read_only=True)
+    # final_score and points_earned are now identical for new games.
+    # Both exposed directly from the model — no aliasing needed.
     class Meta:
         model = GameHistory
         fields = [

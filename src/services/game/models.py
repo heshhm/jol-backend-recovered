@@ -42,8 +42,9 @@ class GameHistory(models.Model):
     status = models.CharField(max_length=20, choices=Status.choices)
 
     # Performance summary
-    final_score = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(100)]
+    final_score = models.PositiveIntegerField(
+        validators=[MinValueValidator(0)],
+        help_text="Client-reported score – also used as points_earned"
     )
     accuracy_percentage = models.FloatField(
         validators=[MinValueValidator(0.0), MaxValueValidator(100.0)],
@@ -55,7 +56,7 @@ class GameHistory(models.Model):
     points_earned = models.PositiveIntegerField(
         default=0,
         db_index=True,
-        help_text="Points calculated from accuracy, hints, time, position"
+        help_text="Equals final_score for completed games, 0 otherwise"
     )
 
     # Conditional / multiplayer-only
@@ -97,71 +98,10 @@ class GameHistory(models.Model):
     def __str__(self):
         return f"{self.player} – {self.match_id} – {self.final_score}pts"
 
-    # SCORING ENGINE – used by both signal & leaderboard queries
-    @property
-    def calculated_points(self) -> int:
-        """
-        Dynamic points calculation – used for:
-        • Real-time leaderboard (today/week/month)
-        • Total points accumulation in UserProfile
-        """
-        if self.status != self.Status.COMPLETED:
-            return 0
-
-        points = 100  # base
-
-        # 1. ACCURACY BONUS (max +40)
-        acc = self.accuracy_percentage or 0
-        if acc >= 95:
-            points += 40
-        elif acc >= 85:
-            points += 35
-        elif acc >= 75:
-            points += 30
-        elif acc >= 65:
-            points += 25
-        elif acc >= 50:
-            points += 20
-        elif acc >= 25:
-            points += 10
-
-        # 2. HINTS PENALTY (max -20)
-        hints = self.hints_used or 0
-        if hints >= 5:
-            points -= 20
-        elif hints >= 3:
-            points -= 15
-        elif hints == 2:
-            points -= 10
-        elif hints == 1:
-            points -= 5
-
-        # 3. TIME BONUS (timed mode only, max +30)
-        if self.game_mode == self.GameMode.TIMED and self.completion_time:
-            gold = self.grid_size * 30    # 4×4 → 120s, 5×5 → 150s, etc.
-            silver = self.grid_size * 45
-            bronze = self.grid_size * 60
-
-            t = self.completion_time
-            if t <= gold:
-                points += 30
-            elif t <= silver:
-                points += 15
-            elif t <= bronze:
-                points += 5
-
-        # 4. MULTIPLAYER POSITION BONUS (max +30)
-        if self.game_type == self.GameType.MULTIPLAYER and self.position:
-            if self.position == 1:
-                points += 30
-            elif self.position == 2:
-                points += 20
-            elif self.position == 3:
-                points += 10
-
-        return max(10, points)  # never below 10
-
     def save(self, *args, **kwargs):
-
-        self.points_earned = self.calculated_points
+        # Non-completed games earn 0 points; otherwise passthrough final_score
+        if self.status == self.Status.COMPLETED:
+            self.points_earned = self.final_score
+        else:
+            self.points_earned = 0
         super().save(*args, **kwargs)

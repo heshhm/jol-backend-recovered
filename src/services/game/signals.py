@@ -10,13 +10,13 @@ from .models import GameHistory
 def award_game_points(sender, instance, created, **kwargs):
     """
     On every new COMPLETED game:
-    → Add calculated_points to UserProfile.total_game_points
-    → Atomic update with select_for_update (prevents race conditions with concurrent saves)
+    → Add points_earned (== final_score) to UserProfile.total_game_points
+    → Atomic update with select_for_update (prevents race conditions)
     """
     if not created or instance.status != sender.Status.COMPLETED:
         return
 
-    points = instance.calculated_points  # your existing method
+    points = instance.points_earned  # set by GameHistory.save()
 
     # Update UserProfile total
     with transaction.atomic():
