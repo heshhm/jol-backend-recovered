@@ -34,6 +34,38 @@ class PasswordResetConfirmPageView(View):
         })
 
 
+class EmailConfirmPageView(View):
+    """
+    Renders a branded HTML page for email verification.
+    Validates the key on load — shows error if invalid/already confirmed.
+    """
+    def get(self, request, key):
+        from allauth.account.models import EmailConfirmationHMAC, EmailConfirmation
+
+        valid = False
+        email = None
+        try:
+            # Try HMAC-based confirmation first (default in modern allauth)
+            confirmation = EmailConfirmationHMAC.from_key(key)
+            if confirmation:
+                email = confirmation.email_address.email
+                valid = True
+            else:
+                # Fall back to DB-based confirmation
+                confirmation = EmailConfirmation.objects.get(key=key)
+                if not confirmation.key_expired():
+                    email = confirmation.email_address.email
+                    valid = True
+        except (EmailConfirmation.DoesNotExist, Exception):
+            valid = False
+
+        return render(request, 'email_confirm.html', {
+            'key': key,
+            'valid': valid,
+            'email': email,
+        })
+
+
 @method_decorator(csrf_exempt, name='dispatch')
 class DownloadPageView(View):
 	"""

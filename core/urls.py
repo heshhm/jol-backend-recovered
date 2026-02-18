@@ -1,5 +1,5 @@
 from src.commons.handlers import handler404, handler500
-from src.commons.views import DownloadPageView, PasswordResetConfirmPageView
+from src.commons.views import DownloadPageView, PasswordResetConfirmPageView, EmailConfirmPageView
 from core.settings import MEDIA_ROOT, STATIC_ROOT
 
 from django.contrib import admin
@@ -14,6 +14,9 @@ handler500 = handler500
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('src.api.urls')),
+
+    # Email confirmation – branded page (must be BEFORE accounts/ include)
+    re_path(r'^accounts/confirm-email/(?P<key>[-:\w]+)/$', EmailConfirmPageView.as_view(), name='account_confirm_email'),
 
     path('accounts/', include('allauth.urls')),
 
