@@ -1,0 +1,36 @@
+Requirement Doc: Account
+Deletion Page for JOL Puzzles
+1. Overview
+As part of the Google Play Data Safety requirements, we must provide a publicly
+accessible URL where users can request the deletion of their account and all
+associated data. This link will be displayed on the Google Play Store listing.
+2. Page Requirements
+The webpage must clearly state the following information to pass Google's review
+process:
+A. App Identification
+The page must mention the app name: JOL Puzzles.
+B. Account Deletion Steps
+Users must be given clear instructions on how to delete their account.
+In-App Path: "Open JOL Puzzles, navigate to Settings > Account > Delete
+Account."
+Alternative Path (Manual Request): "To request account deletion without the app,
+please email our support team at [Support Email Address] with your
+username/email. We will verify your identity before processing the request."
+C. Data Retention & Deletion Policy
+What is Deleted: User profile (name, email, avatar), game scores, wallet balance,
+and referral history.
+What is Kept: We may retain anonymized data for analytical purposes or specific
+transaction records if required by regional financial laws.
+Timeline: Deletion requests should be processed within 30 days.
+3. Technical Specs
+URL Structure Recommended: https://yourdomain.com/jolpuzzles/delete-account
+Accessibility: The page must be publicly accessible without requiring a login (so
+users who uninstalled the app can still find it).
+Requirement Doc: Account Deletion Page for JOL Puzzles
+1
+
+---PAGE---
+SEO: The page can be noindex if desired, but it must be crawlable by Google for
+verification.
+Requirement Doc: Account Deletion Page for JOL Puzzles
+2

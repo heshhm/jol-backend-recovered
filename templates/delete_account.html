@@ -1,0 +1,340 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <title>Delete Your Account – JOL Puzzles</title>
+    <link rel="icon" type="image/png" href="/static/app_logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-pink: #FF409A;
+            --primary-gradient: linear-gradient(135deg, #FF409A 0%, #C438EF 100%);
+            --bg-gradient: linear-gradient(180deg, #E0F7FA 0%, #F3E5F5 50%, #F8BBD0 100%);
+            --accent-green: #00E676;
+            --text-dark: #2D2D2D;
+            --text-muted: #666;
+            --card-bg: rgba(255, 255, 255, 0.55);
+            --card-border: rgba(255, 255, 255, 0.8);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-dark);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Decorative Elements */
+        .bubble {
+            position: fixed;
+            border-radius: 50%;
+            z-index: 0;
+            opacity: 0.45;
+            animation: float 8s ease-in-out infinite;
+            pointer-events: none;
+        }
+        .b1 { width: 100px; height: 100px; background: var(--accent-green); top: 8%; left: 4%; }
+        .b2 { width: 60px; height: 60px; background: #FFD600; bottom: 15%; right: 8%; animation-delay: 1.5s; }
+        .b3 { width: 130px; height: 130px; background: var(--primary-pink); top: 5%; right: 12%; animation-delay: 3s; opacity: 0.15; }
+        .b4 { width: 80px; height: 80px; background: #C438EF; bottom: 30%; left: 6%; animation-delay: 4.5s; opacity: 0.2; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-22px); }
+        }
+
+        .deco-glow {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: 0;
+            opacity: 0.35;
+            pointer-events: none;
+        }
+        .dg-1 { width: 350px; height: 350px; background: var(--primary-pink); top: -5%; right: -5%; }
+        .dg-2 { width: 280px; height: 280px; background: #8E2DE2; bottom: -8%; left: -4%; }
+
+        /* Layout */
+        .page-wrapper {
+            position: relative;
+            z-index: 1;
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 50px 24px 60px;
+        }
+
+        /* Header */
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 24px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(255, 64, 154, 0.2);
+        }
+        .logo img { width: 100%; height: 100%; object-fit: cover; }
+
+        h1 {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 2.4rem;
+            line-height: 1.15;
+            margin-bottom: 12px;
+        }
+        h1 span { color: var(--primary-pink); }
+
+        .page-subtitle {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            line-height: 1.6;
+            max-width: 520px;
+            margin: 0 auto;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 32px 30px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 18px;
+            font-size: 1.5rem;
+        }
+        .icon-app { background: linear-gradient(135deg, #FF409A22, #C438EF22); }
+        .icon-email { background: linear-gradient(135deg, #00E67622, #00BCD422); }
+        .icon-data { background: linear-gradient(135deg, #FFD60022, #FF980022); }
+        .icon-time { background: linear-gradient(135deg, #448AFF22, #7C4DFF22); }
+
+        .card h2 {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.3rem;
+            margin-bottom: 12px;
+            color: var(--text-dark);
+        }
+
+        .card p, .card li {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        .steps-path {
+            display: inline-flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            background: rgba(255, 64, 154, 0.06);
+            border: 1px solid rgba(255, 64, 154, 0.15);
+            border-radius: 12px;
+            padding: 10px 16px;
+            margin: 10px 0 6px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            color: var(--text-dark);
+        }
+        .steps-path .arrow {
+            color: var(--primary-pink);
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .email-link {
+            color: var(--primary-pink);
+            font-weight: 600;
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+        .email-link:hover { opacity: 0.7; }
+
+        .data-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 8px;
+        }
+        .data-list li {
+            position: relative;
+            padding-left: 22px;
+            margin-bottom: 6px;
+        }
+        .data-list li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 9px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        .data-list.deleted li::before { background: var(--primary-pink); }
+        .data-list.retained li::before { background: var(--accent-green); }
+
+        .data-label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+            margin-top: 14px;
+            display: block;
+        }
+        .label-deleted { color: var(--primary-pink); }
+        .label-retained { color: #00BFA5; }
+
+        .timeline-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--primary-gradient);
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 10px 22px;
+            border-radius: 50px;
+            margin-top: 8px;
+            box-shadow: 0 6px 20px rgba(255, 64, 154, 0.3);
+        }
+
+        /* Footer */
+        .page-footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(0, 0, 0, 0.06);
+        }
+        .page-footer p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .page-footer a {
+            color: var(--primary-pink);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .page-footer a:hover { text-decoration: underline; }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .page-wrapper { padding: 30px 16px 40px; }
+            h1 { font-size: 1.9rem; }
+            .page-subtitle { font-size: 0.95rem; }
+            .card { padding: 24px 20px; border-radius: 16px; }
+            .card h2 { font-size: 1.15rem; }
+            .steps-path { font-size: 0.88rem; padding: 8px 12px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Decorative -->
+    <div class="bubble b1"></div>
+    <div class="bubble b2"></div>
+    <div class="bubble b3"></div>
+    <div class="bubble b4"></div>
+    <div class="deco-glow dg-1"></div>
+    <div class="deco-glow dg-2"></div>
+
+    <div class="page-wrapper">
+        <!-- Header -->
+        <header class="page-header">
+            <div class="logo">
+                <img src="{% static 'app_logo.png' %}" alt="JOL Puzzles Logo">
+            </div>
+            <h1>Delete Your <span>Account</span></h1>
+            <p class="page-subtitle">
+                Learn how to delete your JOL Puzzles account and understand what happens to your data.
+            </p>
+        </header>
+
+        <!-- Card: In-App Deletion -->
+        <section class="card" id="in-app-deletion">
+            <div class="card-icon icon-app">📱</div>
+            <h2>Delete From the App</h2>
+            <p>Open JOL Puzzles and follow this path:</p>
+            <div class="steps-path">
+                Settings <span class="arrow">→</span>
+                Account <span class="arrow">→</span>
+                Delete Account
+            </div>
+            <p>Follow the on-screen prompts to confirm. Your deletion request will be processed immediately.</p>
+        </section>
+
+        <!-- Card: Manual Request -->
+        <section class="card" id="manual-request">
+            <div class="card-icon icon-email">✉️</div>
+            <h2>Request Deletion via Email</h2>
+            <p>
+                If you no longer have access to the app, you can request account deletion by emailing our support team at
+                <a href="mailto:jolpuzzles.info@gmail.com" class="email-link">jolpuzzles.info@gmail.com</a>.
+            </p>
+            <p>Please include your <strong>username or registered email address</strong>. We will verify your identity before processing the request.</p>
+        </section>
+
+        <!-- Card: Data Policy -->
+        <section class="card" id="data-policy">
+            <div class="card-icon icon-data">🗃️</div>
+            <h2>What Happens to Your Data</h2>
+
+            <span class="data-label label-deleted">Permanently deleted</span>
+            <ul class="data-list deleted">
+                <li>User profile (name, email, avatar)</li>
+                <li>Game scores &amp; progress</li>
+                <li>Wallet balance</li>
+                <li>Referral history</li>
+            </ul>
+
+            <span class="data-label label-retained">May be retained</span>
+            <ul class="data-list retained">
+                <li>Anonymized data for analytical purposes</li>
+                <li>Transaction records required by regional financial laws</li>
+            </ul>
+        </section>
+
+        <!-- Card: Timeline -->
+        <section class="card" id="deletion-timeline">
+            <div class="card-icon icon-time">⏱️</div>
+            <h2>Processing Timeline</h2>
+            <p>All deletion requests are processed within:</p>
+            <div class="timeline-badge">
+                🕐 30 Days
+            </div>
+            <p style="margin-top: 12px;">You will receive a confirmation email once the process is complete.</p>
+        </section>
+
+        <!-- Footer -->
+        <footer class="page-footer">
+            <p>
+                Need help? Contact us at
+                <a href="mailto:jolpuzzles.info@gmail.com">jolpuzzles.info@gmail.com</a>
+            </p>
+            <p style="margin-top: 6px;">© 2026 JOL Puzzles. All rights reserved.</p>
+        </footer>
+    </div>
+</body>
+</html>

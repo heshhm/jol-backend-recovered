@@ -140,3 +140,12 @@ class DownloadPageView(View):
 			logger = logging.getLogger(__name__)
 			logger.error(f"DownloadPageView POST: Failed to create PendingReferral: {e}")
 			return JsonResponse({'success': False, 'error': 'failed to track click'}, status=500)
+
+
+class AccountDeletionPageView(View):
+	"""
+	Publicly accessible account deletion info page for Google Play Store compliance.
+	GET /jolpuzzles/delete-account/ — renders deletion instructions and data policy.
+	"""
+	def get(self, request):
+		return render(request, 'delete_account.html')
