@@ -149,3 +149,12 @@ class AccountDeletionPageView(View):
 	"""
 	def get(self, request):
 		return render(request, 'delete_account.html')
+
+
+class SupportPageView(View):
+	"""
+	Publicly accessible support/help page for iOS App Store compliance.
+	GET /jolpuzzles/support/ — renders FAQ, contact info, and account management links.
+	"""
+	def get(self, request):
+		return render(request, 'support.html')

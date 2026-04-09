@@ -1,5 +1,5 @@
 from src.commons.handlers import handler404, handler500
-from src.commons.views import DownloadPageView, PasswordResetConfirmPageView, EmailConfirmPageView, AccountDeletionPageView
+from src.commons.views import DownloadPageView, PasswordResetConfirmPageView, EmailConfirmPageView, AccountDeletionPageView, SupportPageView
 from core.settings import MEDIA_ROOT, STATIC_ROOT
 
 from django.contrib import admin
@@ -32,6 +32,9 @@ urlpatterns = [
 
     # Account deletion page (Google Play Data Safety requirement)
     path('jolpuzzles/delete-account/', AccountDeletionPageView.as_view(), name='delete_account'),
+
+    # Support page (iOS App Store requirement)
+    path('jolpuzzles/support/', SupportPageView.as_view(), name='support'),
 
     # Redirect root to download page
     path('', RedirectView.as_view(url='/download/', permanent=False)),

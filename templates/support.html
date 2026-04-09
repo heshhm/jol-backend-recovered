@@ -1,0 +1,474 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <title>Support – JOL Puzzles</title>
+    <meta name="description" content="Get help with JOL Puzzles. Contact our support team, find answers to common questions, and learn how to manage your account.">
+    <link rel="icon" type="image/png" href="/static/app_logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-pink: #FF409A;
+            --primary-gradient: linear-gradient(135deg, #FF409A 0%, #C438EF 100%);
+            --bg-gradient: linear-gradient(180deg, #E0F7FA 0%, #F3E5F5 50%, #F8BBD0 100%);
+            --accent-green: #00E676;
+            --text-dark: #2D2D2D;
+            --text-muted: #666;
+            --card-bg: rgba(255, 255, 255, 0.55);
+            --card-border: rgba(255, 255, 255, 0.8);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-dark);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Decorative Elements */
+        .bubble {
+            position: fixed;
+            border-radius: 50%;
+            z-index: 0;
+            opacity: 0.45;
+            animation: float 8s ease-in-out infinite;
+            pointer-events: none;
+        }
+        .b1 { width: 100px; height: 100px; background: var(--accent-green); top: 8%; left: 4%; }
+        .b2 { width: 60px; height: 60px; background: #FFD600; bottom: 15%; right: 8%; animation-delay: 1.5s; }
+        .b3 { width: 130px; height: 130px; background: var(--primary-pink); top: 5%; right: 12%; animation-delay: 3s; opacity: 0.15; }
+        .b4 { width: 80px; height: 80px; background: #C438EF; bottom: 30%; left: 6%; animation-delay: 4.5s; opacity: 0.2; }
+        .b5 { width: 50px; height: 50px; background: #448AFF; top: 55%; right: 5%; animation-delay: 2s; opacity: 0.25; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-22px); }
+        }
+
+        .deco-glow {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: 0;
+            opacity: 0.35;
+            pointer-events: none;
+        }
+        .dg-1 { width: 350px; height: 350px; background: var(--primary-pink); top: -5%; right: -5%; }
+        .dg-2 { width: 280px; height: 280px; background: #8E2DE2; bottom: -8%; left: -4%; }
+
+        /* Layout */
+        .page-wrapper {
+            position: relative;
+            z-index: 1;
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 50px 24px 60px;
+        }
+
+        /* Header */
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 24px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(255, 64, 154, 0.2);
+        }
+        .logo img { width: 100%; height: 100%; object-fit: cover; }
+
+        h1 {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 2.4rem;
+            line-height: 1.15;
+            margin-bottom: 12px;
+        }
+        h1 span { color: var(--primary-pink); }
+
+        .page-subtitle {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            line-height: 1.6;
+            max-width: 520px;
+            margin: 0 auto;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 32px 30px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 18px;
+            font-size: 1.5rem;
+        }
+        .icon-contact { background: linear-gradient(135deg, #FF409A22, #C438EF22); }
+        .icon-faq { background: linear-gradient(135deg, #448AFF22, #7C4DFF22); }
+        .icon-account { background: linear-gradient(135deg, #00E67622, #00BCD422); }
+        .icon-bug { background: linear-gradient(135deg, #FFD60022, #FF980022); }
+        .icon-privacy { background: linear-gradient(135deg, #E040FB22, #AA00FF22); }
+
+        .card h2 {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.3rem;
+            margin-bottom: 12px;
+            color: var(--text-dark);
+        }
+
+        .card p, .card li {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        /* Email link */
+        .email-link {
+            color: var(--primary-pink);
+            font-weight: 600;
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+        .email-link:hover { opacity: 0.7; }
+
+        /* Contact button */
+        .contact-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--primary-gradient);
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 14px 28px;
+            border-radius: 50px;
+            text-decoration: none;
+            margin-top: 16px;
+            box-shadow: 0 8px 24px rgba(255, 64, 154, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .contact-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(255, 64, 154, 0.4);
+        }
+
+        /* FAQ accordion */
+        .faq-item {
+            border-top: 1px solid rgba(0, 0, 0, 0.06);
+            padding: 16px 0;
+        }
+        .faq-item:first-of-type { border-top: none; padding-top: 4px; }
+        .faq-item:last-of-type { padding-bottom: 0; }
+
+        .faq-question {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            gap: 12px;
+        }
+        .faq-question h3 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            flex: 1;
+        }
+        .faq-toggle {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(255, 64, 154, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary-pink);
+            flex-shrink: 0;
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+        .faq-item.open .faq-toggle {
+            transform: rotate(45deg);
+            background: rgba(255, 64, 154, 0.15);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.35s ease, padding 0.35s ease;
+        }
+        .faq-item.open .faq-answer {
+            max-height: 200px;
+            padding-top: 10px;
+        }
+        .faq-answer p {
+            font-size: 0.9rem;
+            line-height: 1.7;
+        }
+
+        /* Quick-links list */
+        .quick-links {
+            list-style: none;
+            padding: 0;
+            margin-top: 8px;
+        }
+        .quick-links li {
+            position: relative;
+            padding-left: 22px;
+            margin-bottom: 10px;
+        }
+        .quick-links li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 9px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary-pink);
+        }
+        .quick-links a {
+            color: var(--primary-pink);
+            font-weight: 500;
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+        .quick-links a:hover { opacity: 0.7; }
+
+        /* Response time badge */
+        .response-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #00E676, #00BFA5);
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 8px 18px;
+            border-radius: 50px;
+            margin-top: 12px;
+            box-shadow: 0 4px 14px rgba(0, 230, 118, 0.25);
+        }
+
+        /* Footer */
+        .page-footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(0, 0, 0, 0.06);
+        }
+        .page-footer p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .page-footer a {
+            color: var(--primary-pink);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .page-footer a:hover { text-decoration: underline; }
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .page-wrapper { padding: 30px 16px 40px; }
+            h1 { font-size: 1.9rem; }
+            .page-subtitle { font-size: 0.95rem; }
+            .card { padding: 24px 20px; border-radius: 16px; }
+            .card h2 { font-size: 1.15rem; }
+            .contact-btn { font-size: 0.9rem; padding: 12px 22px; }
+            .footer-links { gap: 14px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Decorative -->
+    <div class="bubble b1"></div>
+    <div class="bubble b2"></div>
+    <div class="bubble b3"></div>
+    <div class="bubble b4"></div>
+    <div class="bubble b5"></div>
+    <div class="deco-glow dg-1"></div>
+    <div class="deco-glow dg-2"></div>
+
+    <div class="page-wrapper">
+        <!-- Header -->
+        <header class="page-header">
+            <div class="logo">
+                <img src="{% static 'app_logo.png' %}" alt="JOL Puzzles Logo">
+            </div>
+            <h1>How Can We <span>Help?</span></h1>
+            <p class="page-subtitle">
+                We're here to make your JOL Puzzles experience amazing. Find answers below or reach out to our support team directly.
+            </p>
+        </header>
+
+        <!-- Card: Contact Us -->
+        <section class="card" id="contact-support">
+            <div class="card-icon icon-contact">💬</div>
+            <h2>Contact Our Team</h2>
+            <p>
+                Have a question or running into an issue? Our support team is happy to help. Send us an email and we'll get back to you as soon as possible.
+            </p>
+            <a href="mailto:jolpuzzles.info@gmail.com" class="contact-btn">
+                ✉️ Email Support
+            </a>
+            <div class="response-badge">⚡ Typical response within 24 hours</div>
+        </section>
+
+        <!-- Card: FAQ -->
+        <section class="card" id="faq">
+            <div class="card-icon icon-faq">❓</div>
+            <h2>Frequently Asked Questions</h2>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <h3>How do I reset my password?</h3>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Open the app, go to the login screen, and tap <strong>"Forgot Password?"</strong>. Enter your registered email address, and we'll send you a reset link. Follow the instructions in the email to set a new password.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <h3>I'm not receiving my verification email</h3>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Check your <strong>spam or junk folder</strong> first. If you still don't see it, make sure you entered the correct email address. You can request a new verification email from the app. If the issue persists, contact our support team.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <h3>How do I update my profile information?</h3>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Open JOL Puzzles and navigate to <strong>Settings → Profile</strong>. From there you can update your display name, avatar, and other account details.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <h3>Can I use JOL Puzzles on multiple devices?</h3>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Yes! Simply log in with the same account on any supported device. Your progress, scores, and wallet balance will sync automatically across all your devices.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <h3>How does the referral system work?</h3>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Share your unique referral code with friends. When they sign up and join a game, both of you can earn rewards! Find your referral code in <strong>Settings → Referrals</strong>.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Card: Account Management -->
+        <section class="card" id="account-management">
+            <div class="card-icon icon-account">👤</div>
+            <h2>Account Management</h2>
+            <p>Need to manage your account? Here are some helpful links:</p>
+            <ul class="quick-links">
+                <li><a href="/jolpuzzles/delete-account/">Delete your account</a> — permanently remove your data</li>
+                <li><a href="mailto:jolpuzzles.info@gmail.com?subject=Account%20Recovery%20Request">Account recovery</a> — regain access to your account</li>
+                <li><a href="mailto:jolpuzzles.info@gmail.com?subject=Data%20Export%20Request">Data export</a> — request a copy of your data</li>
+            </ul>
+        </section>
+
+        <!-- Card: Report a Bug -->
+        <section class="card" id="report-bug">
+            <div class="card-icon icon-bug">🐛</div>
+            <h2>Report a Bug</h2>
+            <p>
+                Found something that doesn't look right? Help us improve by reporting it. Please include as much detail as possible: your device model, OS version, and steps to reproduce the issue.
+            </p>
+            <a href="mailto:jolpuzzles.info@gmail.com?subject=Bug%20Report%20%E2%80%93%20JOL%20Puzzles&body=Device%3A%20%0AOS%20Version%3A%20%0AApp%20Version%3A%20%0A%0ADescribe%20the%20issue%3A%0A" class="contact-btn" style="background: linear-gradient(135deg, #FFD600, #FF9800); box-shadow: 0 8px 24px rgba(255, 152, 0, 0.3);">
+                🐞 Report a Bug
+            </a>
+        </section>
+
+        <!-- Card: Privacy -->
+        <section class="card" id="privacy-info">
+            <div class="card-icon icon-privacy">🔒</div>
+            <h2>Privacy & Data</h2>
+            <p>
+                Your privacy matters to us. JOL Puzzles collects only the data necessary to provide you with the best gaming experience. We never sell your personal information to third parties.
+            </p>
+            <p style="margin-top: 10px;">
+                For deletion requests, visit our
+                <a href="/jolpuzzles/delete-account/" class="email-link">account deletion page</a>
+                or email us at
+                <a href="mailto:jolpuzzles.info@gmail.com" class="email-link">jolpuzzles.info@gmail.com</a>.
+            </p>
+        </section>
+
+        <!-- Footer -->
+        <footer class="page-footer">
+            <div class="footer-links">
+                <a href="/download/">Download App</a>
+                <a href="/jolpuzzles/delete-account/">Delete Account</a>
+                <a href="mailto:jolpuzzles.info@gmail.com">Email Us</a>
+            </div>
+            <p>© 2026 JOL Puzzles. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        function toggleFaq(el) {
+            const item = el.closest('.faq-item');
+            const isOpen = item.classList.contains('open');
+
+            // Close all
+            document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+
+            // Toggle current
+            if (!isOpen) {
+                item.classList.add('open');
+            }
+        }
+    </script>
+</body>
+</html>
