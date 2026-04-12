@@ -10,7 +10,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from core.settings import GOOGLE_CALLBACK_ADDRESS, APPLE_CALLBACK_ADDRESS
+from core.settings import GOOGLE_CALLBACK_ADDRESS
 from src.api.auth.serializer import PasswordSerializer
 
 class GoogleLogin(SocialLoginView):
@@ -28,17 +28,13 @@ class GoogleConnect(SocialConnectView):
 
 
 class AppleLogin(SocialLoginView):
-    """ Handles Apple social login """
+    """ Handles Apple social login (native iOS) """
     adapter_class = AppleOAuth2Adapter
-    callback_url = APPLE_CALLBACK_ADDRESS
-    client_class = OAuth2Client
 
 
 class AppleConnect(SocialConnectView):
-    """ Handles Apple social account connection """
+    """ Handles Apple social account connection (native iOS) """
     adapter_class = AppleOAuth2Adapter
-    callback_url = APPLE_CALLBACK_ADDRESS
-    client_class = OAuth2Client
 
 
 class CustomLoginView(LoginView):

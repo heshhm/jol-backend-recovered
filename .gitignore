@@ -53,6 +53,10 @@ migrations/
 **/migrations/
 
 
+# Apple private keys
+*.p8
+
 # TEMP
 .trunk
+pdf_output.txt
 

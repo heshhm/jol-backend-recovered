@@ -55,6 +55,22 @@ LOGOUT_ON_PASSWORD_CHANGE = False
 GOOGLE_CALLBACK_ADDRESS = f"{BASE_URL}/accounts/google/login/callback/"
 APPLE_CALLBACK_ADDRESS = f"{BASE_URL}/accounts/apple/login/callback/"
 
+# ====================================================================================== SOCIAL ACCOUNT PROVIDERS
+SOCIALACCOUNT_PROVIDERS = {
+    "apple": {
+        "APPS": [
+            {
+                "client_id": env("APPLE_CLIENT_ID"),          # Bundle ID
+                "secret": env("APPLE_KEY_ID"),                 # Key ID
+                "key": env("APPLE_TEAM_ID"),                   # Team ID
+                "settings": {
+                    "certificate_key": env("APPLE_PRIVATE_KEY").replace("\\n", "\n"),
+                },
+            },
+        ],
+    },
+}
+
 INSTALLED_APPS = [
     "jazzmin",
 
